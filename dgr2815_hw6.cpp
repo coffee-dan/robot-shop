@@ -137,26 +137,71 @@ class RobotModel {
 class View {
   public:
     View(vector<RobotPart*>& rps) : robotparts(rps) { }
-    string get_menu();
+    string get_main_menu();
+    string get_part_menu();
     string get_part_list();
-    string get_help();
   private:
     vector<RobotPart*>& robotparts;
 };
+
+string View::get_main_menu() {
+  string menu = R"(
+=======================
+Welcome to robot shop !
+=======================
+
+Robot
+-----
+(1) - Create robot part
+(2) - List robot parts
+
+Utility
+-------
+(0) - Exit
+
+)";
+  return menu;
+}
+string View::get_part_menu() {
+  string menu = R"(
+##################
+Which robot part??
+##################
+  Arm       :: 1
+  Battery   :: 2
+  Head      :: 3
+  Locomotor :: 4
+  Torso     :: 5
+
+  CANCEL    :: 0
+
+)";
+  return menu;
+}
+string View::get_part_list() {
+  string output;
+  for(int i = 0; i < robotparts.size(); i++) {
+    output += robotparts[i]->part_to_string();
+  }
+  return output;
+}
 // /////////////////////////////////////
 //         C O N T R O L L E R
 // /////////////////////////////////////
 class Controller {
   public:
-    Controller(vector<RobotPart*>& rps) : robotparts(rps) { }
+    Controller(vector<RobotPart*>& rps, View& view) : robotparts(rps), view(view)  { }
     void cli();
     void execute_cmd(int cmd);
+    void part_interface();
+    void create_part(int choice);
   private:
     double get_double(string prompt, double max_double);
     int get_int(string prompt, int max_int);
     int get_int(string prompt, int min_int, int max_int);
     string get_string(string prompt);
     vector<RobotPart*>& robotparts;
+    View& view;
 };
 
 double Controller::get_double(string prompt, double max_double) {
@@ -201,15 +246,32 @@ string Controller::get_string(string prompt) {
 
 void Controller::cli() {
   int cmd = -1;
-  string prompt = "\nWhich part would you like to create?\nArm : 1\nBattery : 2\nHead : 3\nLocomotor : 4\nTorso : 5\n\n";
+  string prompt = view.get_main_menu();
   while(cmd != 0) {
-    cmd = get_int(prompt, 5);
+    cmd = get_int(prompt, 2);
     execute_cmd(cmd);
   }
-  cout << "Goodbye\n";
+  cout << "Exitting program...\n";
 }
 void Controller::execute_cmd(int cmd) {
   if(cmd == 0) return;
+  if(cmd == 1) {
+    this->part_interface();
+  } else if (cmd == 2) {
+    cout << view.get_part_list();
+  }
+}
+void Controller::part_interface() {
+  int choice = -1;
+  string prompt = view.get_part_menu();
+  while(choice != 0) {
+    choice = get_int(prompt, 5);
+    create_part(choice);
+  }
+  cout << "Returning to main menu...\n";
+}
+void Controller::create_part(int choice) {
+  if(choice == 0) return;
   cout << "Gathering default robot part information...\n";
   string name, description, image_filename;
   int model_number;
@@ -223,7 +285,7 @@ void Controller::execute_cmd(int cmd) {
 
   RobotPart* part;
 
-  if(cmd == 1) {
+  if(choice == 1) {
     cout << "Gathering unique robot arm information...\n";
     double max_power;
 
@@ -231,7 +293,7 @@ void Controller::execute_cmd(int cmd) {
     part = new Arm{name, model_number, cost, description, image_filename, max_power};
     robotparts.push_back(part);
 
-  } else if(cmd == 2) {
+  } else if(choice == 2) {
     cout << "Gathering unique battery information...\n";
     double power_available, max_energy;
 
@@ -240,7 +302,7 @@ void Controller::execute_cmd(int cmd) {
     part = new Battery{name, model_number, cost, description, image_filename, power_available, max_energy};
     robotparts.push_back(part);
 
-  } else if(cmd == 3) {
+  } else if(choice == 3) {
     cout << "Gathering unique robot head information...\n";
     double power;
 
@@ -248,7 +310,7 @@ void Controller::execute_cmd(int cmd) {
     part = new Head{name, model_number, cost, description, image_filename, power};
     robotparts.push_back(part);
 
-  } else if(cmd == 4) {
+  } else if(choice == 4) {
     cout << "Gathering unique locomotor information...\n";
     double max_power;
 
@@ -256,7 +318,7 @@ void Controller::execute_cmd(int cmd) {
     part = new Locomotor{name, model_number, cost, description, image_filename, max_power};
     robotparts.push_back(part);
 
-  } else if(cmd == 5) {
+  } else if(choice == 5) {
     cout << "Gathering unique robot torso information...\n";
     int battery_compartments, max_arms;
 
@@ -270,6 +332,7 @@ void Controller::execute_cmd(int cmd) {
 
 int main() {
   vector<RobotPart*> rps;
-  Controller controller{rps};
+  View view{rps};
+  Controller controller{rps, view};
   controller.cli();
 }

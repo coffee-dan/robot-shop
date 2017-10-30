@@ -170,7 +170,6 @@ Welcome to robot shop !
 
   Utility
   -------
-  Test        :: 3
   Exit        :: 0
 
 )";
@@ -210,7 +209,9 @@ class Controller {
     void part_interface();
     void create_part(int choice);
   private:
+    double get_double(string prompt);
     double get_double(string prompt, double max_double);
+    int get_int(string prompt);
     int get_int(string prompt, int max_int);
     int get_int(string prompt, int min_int, int max_int);
     string get_string(string prompt);
@@ -218,14 +219,25 @@ class Controller {
     View& view;
 };
 
-double Controller::get_double(string prompt, double max_double) {
+double Controller::get_double(string prompt) {
   double result;
   while(true) {
     cout << prompt;
     cin >> result;
-    cin.ignore(); // consume \n
-    if (0 <= result && result <= max_double) break;
-    cout << "Please enter an integer between 0 and " << max_double << endl;
+    cin.ignore();
+    if(0 < result) break;
+    cout << "Please enter a value greater than zero" << endl;
+  }
+  return result;
+}
+int Controller::get_int(string prompt) {
+  int result;
+  while(true) {
+    cout << prompt;
+    cin >> result;
+    cin.ignore();
+    if(0 < result) break;
+    cout << "Please enter an integer greater than zero" << endl;
   }
   return result;
 }
@@ -292,8 +304,8 @@ void Controller::create_part(int choice) {
   double cost;
 
   name = get_string("Name? ");
-  model_number = get_int("Model Number? ", 10000);
-  cost = get_double("Cost[$]? ", 10000.0);
+  model_number = get_int("Model Number? ");
+  cost = get_double("Cost[$]? ");
   description = get_string("Description? ");
   image_filename = "default.png";
 
@@ -304,7 +316,7 @@ void Controller::create_part(int choice) {
     double max_power;
 
     type = "Arm";
-    max_power = get_double("Max Power[W]? ", 9000);
+    max_power = get_double("Max Power[W]? ");
     part = new Arm{type, name, model_number, cost, description, image_filename, max_power};
     robotparts.push_back(part);
 
@@ -313,8 +325,8 @@ void Controller::create_part(int choice) {
     double power_available, max_energy;
 
     type = "Battery";
-    power_available = get_double("Max Power[W]? ", 90000);
-    max_energy = get_double("Max Energy[kWh]? ", 10000);
+    power_available = get_double("Max Power[W]? ");
+    max_energy = get_double("Max Energy[kWh]? ");
     part = new Battery{type, name, model_number, cost, description, image_filename, power_available, max_energy};
     robotparts.push_back(part);
 
@@ -322,8 +334,8 @@ void Controller::create_part(int choice) {
     cout << "Gathering unique robot head information...\n";
     double power;
 
-    type = "Battery";
-    power = get_double("Power? ", 10000);
+    type = "Head";
+    power = get_double("Power? ");
     part = new Head{type, name, model_number, cost, description, image_filename, power};
     robotparts.push_back(part);
 
@@ -332,7 +344,7 @@ void Controller::create_part(int choice) {
     double max_power;
 
     type = "Locomotor";
-    max_power = get_double("Max Power[W]? ", 9000);
+    max_power = get_double("Max Power[W]? ");
     part = new Locomotor{type, name, model_number, cost, description, image_filename, max_power};
     robotparts.push_back(part);
 
@@ -342,7 +354,7 @@ void Controller::create_part(int choice) {
 
     type = "Torso";
     battery_compartments = get_int("Battery Compartments? ", 1, 3);
-    max_arms = get_int("Max Arms? ", 2);
+    max_arms = get_int("Max Arms? ", 1, 2);
     part = new Torso{type, name, model_number, cost, description, image_filename, battery_compartments, max_arms};
     robotparts.push_back(part);
 

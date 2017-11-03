@@ -8,7 +8,7 @@ debug: CXX += -g
 debug: main
 
 main: dgr2815_hw7.cpp
-	$(CXX) $(CXXFLAGS) -o hw7 dgr2815_hw6.cpp
+	$(CXX) $(CXXFLAGS) -o hw7 dgr2815_hw7.cpp
 
 test: test.cpp
 	$(CXX) $(CXXFLAGS) -o test test.cpp

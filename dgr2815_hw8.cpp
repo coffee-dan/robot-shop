@@ -178,8 +178,10 @@ string View::get_main_menu() {
 
   Main Menu
   ---------
-  1 Create
-  2 Report
+  1 Create Part
+  2 Create Model
+  3 Report Part
+  4 Report Model
   0 Exit Program
 
 )";
@@ -195,7 +197,6 @@ string View::get_part_menu() {
   3 Head
   4 Locomotor
   5 Torso
-
   0 Exit to Main Menu
 
 )";
@@ -207,8 +208,8 @@ string View::get_model_menu() {
   Create Robot Model
   ------------------
   1 Create Model
-
   0 Exit to Main Menu
+
 )";
   return menu;
 }
@@ -309,7 +310,7 @@ void Controller::cli() {
   int cmd = -1;
   string prompt = view.get_main_menu();
   while(cmd != 0) {
-    cmd = get_int(prompt, 2);
+    cmd = get_int(prompt, 3);
     execute_cmd(cmd);
   }
   cout << "Exitting program...\n";
@@ -320,9 +321,13 @@ void Controller::execute_cmd(int cmd) {
     cout << "Navigating to part menu...\n";
     this->part_interface();
   } else if (cmd == 2) {
+    cout << "Navigating to model menu...\n";
+    this->model_interface();
+  } else if (cmd == 3) {
     cout << view.get_part_list();
   }
 }
+
 void Controller::part_interface() {
   int choice = -1;
   string prompt = view.get_part_menu();
@@ -397,6 +402,7 @@ void Controller::create_part(int choice) {
 
   }
 }
+
 void Controller::model_interface() {
   int choice = -1;
   string prompt = view.get_model_menu();
@@ -414,7 +420,9 @@ void Controller::create_model(int choice) {
   }
 
   string name, type;
-  int model_number, num_of_arms, num_of_batteries, partIndex;
+  int model_number, partIndex;
+  int maxArms, numOfArms;
+  int maxBatteries, numOfBatteries;
   RobotPart* torso;
   RobotPart* head;
   RobotPart* locomotor;
@@ -453,8 +461,8 @@ void Controller::create_model(int choice) {
     arm = robotparts[partIndex];
   else
     return;
-
-  num_of_arms = get_int("How many arms? ", 1, torso->getMaxArms());
+  maxArms = static_cast<Torso*>(torso)->getMaxArms();
+  numOfArms = get_int("How many arms? ", 1, maxArms);
 
   type = "Battery";
   partIndex = get_part(type);
@@ -462,17 +470,17 @@ void Controller::create_model(int choice) {
     battery = robotparts[partIndex];
   else
     return;
+  maxBatteries = static_cast<Torso*>(torso)->getBatteryCompartments();
+  numOfBatteries = get_int("How many batteries? ", 1, maxBatteries);
 
-  num_of_batteries = get_int("How many batteries? ", 1, torso->getBatteryCompartments());
-
-  model = new RobotModel{name, model_number, torso, head, locomotor, arm, battery, num_of_batteries, num_of_arms};
+  model = new RobotModel{name, model_number, torso, head, locomotor, arm, battery, numOfBatteries, numOfArms};
 }
 int Controller::get_part(string type) {
   string partName, prompt;
   bool partExists = false;
   int partIndex;
 
-  prompt = type+" name?";
+  prompt = type+" name? ";
   cout << "Accessing "+type+" information...\n";
 
   cout << view.get_part_list(type);
@@ -487,6 +495,7 @@ int Controller::get_part(string type) {
 
   if(!partExists) {
     cout << "Fatal Error - Invalid part name.";
+    cout << "Please restart the robot model creation process.";
     return -1;
   }
   return partIndex;

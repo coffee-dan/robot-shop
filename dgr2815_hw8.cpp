@@ -163,10 +163,12 @@ double RobotModel::cost() {
 // /////////////////////////////////////
 class View {
   public:
-    View(vector<RobotPart*>& rps) : robotparts(rps) { }
+    View(vector<RobotPart*>& rps)
+     : robotparts(rps) { }
     string get_main_menu();
+    string get_create_menu();
     string get_part_menu();
-    string get_model_menu();
+    string get_report_menu();
     string get_part_list();
     string get_part_list(string type);
   private:
@@ -178,11 +180,22 @@ string View::get_main_menu() {
 
   Main Menu
   ---------
-  1 Create Part
-  2 Create Model
-  3 Report Part
-  4 Report Model
+  1 Create
+  2 Report
   0 Exit Program
+
+)";
+  return menu;
+}
+string View::get_create_menu() {
+  string menu = R"(
+
+  Create
+  ------
+  1 Part
+  2 Model
+  9 Easter Egg
+  0 Exit to Main Menu
 
 )";
   return menu;
@@ -202,12 +215,13 @@ string View::get_part_menu() {
 )";
   return menu;
 }
-string View::get_model_menu() {
+string View::get_report_menu() {
   string menu = R"(
 
-  Create Robot Model
-  ------------------
-  1 Create Model
+  Report
+  ------
+  1 Part
+  2 Model
   0 Exit to Main Menu
 
 )";
@@ -235,12 +249,17 @@ class Controller {
   public:
     Controller(vector<RobotPart*>& rps, vector<RobotModel*> rms, View& view)
      : robotparts(rps), robotmodels(rms), view(view)  { }
-    void cli();
-    void execute_cmd(int cmd);
+    void main_interface();
+    void main_runner(int choice);
+
+    void create_interface();
+    void create_runner(int choice);
     void part_interface();
     void create_part(int choice);
-    void model_interface();
-    void create_model(int choice);
+    void create_model();
+
+    void report_interface();
+    void report_runner(int choice);
   private:
     double get_double(string prompt);
     double get_double(string prompt, double max_double);
@@ -306,28 +325,60 @@ string Controller::get_string(string prompt) {
   return result;
 }
 
-void Controller::cli() {
-  int cmd = -1;
+int Controller::get_part(string type) {
+  string partName, prompt;
+  bool partExists = false;
+  int partIndex;
+
+  prompt = "Select a part.\n"+type+" name? ";
+  cout << "Accessing "+type+" information...\n\n";
+
+  cout << view.get_part_list(type);
+  partName = get_string(prompt);
+  for(int i = 0; i < robotparts.size(); i++) {
+    if(robotparts[i]->getName() == partName) {
+      //Resolve potential name ambiguity here
+      partExists = true;
+      partIndex = i;
+    }
+  }
+
+  if(!partExists) {
+    cout << "Fatal Error - Invalid part name.";
+    cout << "Please restart the robot model creation process.";
+    return -1;
+  }
+  return partIndex;
+}
+
+void Controller::main_interface() {
+  int choice = -1;
   string prompt = view.get_main_menu();
-  while(cmd != 0) {
-    cmd = get_int(prompt, 3);
-    execute_cmd(cmd);
+  while(choice != 0) {
+    choice = get_int(prompt, 2);
+    main_runner(choice);
   }
   cout << "Exitting program...\n";
 }
-void Controller::execute_cmd(int cmd) {
-  if(cmd == 0) return;
-  if(cmd == 1) {
-    cout << "Navigating to part menu...\n";
-    this->part_interface();
-  } else if (cmd == 2) {
-    cout << "Navigating to model menu...\n";
-    this->model_interface();
-  } else if (cmd == 3) {
-    cout << view.get_part_list();
+void Controller::main_runner(int choice) {
+  if(choice == 0) return;
+  if(choice == 1) {
+    cout << "Navigating to create menu...\n";
+    this->create_interface();
+  } else if (choice == 2) {
+    cout << "Navigating to report menu...\n";
+    this->report_interface();
   }
 }
 
+void Controller::create_interface() {
+  int choice = -1;
+  string prompt = view.get_create_menu();
+  while (choice != 0) {
+    choice = get_int(prompt, 2);
+  }
+  cout << "Returning to main menu...\n";
+}
 void Controller::part_interface() {
   int choice = -1;
   string prompt = view.get_part_menu();
@@ -402,18 +453,7 @@ void Controller::create_part(int choice) {
 
   }
 }
-
-void Controller::model_interface() {
-  int choice = -1;
-  string prompt = view.get_model_menu();
-  while (choice != 0) {
-    choice = get_int(prompt, 2);
-    create_model(choice);
-  }
-  cout << "Returning to main menu...\n";
-}
-void Controller::create_model(int choice) {
-  if(choice == 0) return;
+void Controller::create_model() {
   if(robotparts.size() < 5) {
     cout << "Fatal Error - Less than 5 parts exist in the shop\'s inventory.";
     return;
@@ -474,31 +514,15 @@ void Controller::create_model(int choice) {
   numOfBatteries = get_int("How many batteries? ", 1, maxBatteries);
 
   model = new RobotModel{name, model_number, torso, head, locomotor, arm, battery, numOfBatteries, numOfArms};
+  robotmodels.push_back(model);
+
 }
-int Controller::get_part(string type) {
-  string partName, prompt;
-  bool partExists = false;
-  int partIndex;
 
-  prompt = type+" name? ";
-  cout << "Accessing "+type+" information...\n";
+void Controller::report_interface() {
 
-  cout << view.get_part_list(type);
-  partName = get_string(prompt);
-  for(int i = 0; i < robotparts.size(); i++) {
-    if(robotparts[i]->getName() == partName) {
-      //Resolve potential name ambiguity here
-      partExists = true;
-      partIndex = i;
-    }
-  }
+}
+void Controller::report_runner(int choice) {
 
-  if(!partExists) {
-    cout << "Fatal Error - Invalid part name.";
-    cout << "Please restart the robot model creation process.";
-    return -1;
-  }
-  return partIndex;
 }
 
 int main() {
@@ -506,5 +530,5 @@ int main() {
   vector<RobotModel*> rms;
   View view{rps};
   Controller controller{rps, rms, view};
-  controller.cli();
+  controller.main_interface();
 }

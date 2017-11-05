@@ -13,9 +13,10 @@ class RobotPart {
   public:
     RobotPart(string t, string n, int m, double c, double w, string d, string i)
       : type(t), name(n), model_number(m), cost(c), weight(w), description(d), image_filename(i) { }
-    double get_cost();
-    string get_type();
-    string get_name();
+    string getType() { return type; }
+    string getName() { return name; }
+    double getCost() { return cost; }
+    double getWeight() { return weight; }
     string dtos(double num, int precision);
     string to_string();
     virtual string part_to_string()=0;
@@ -28,16 +29,6 @@ class RobotPart {
     string description;
     string image_filename;
 };
-
-double RobotPart::get_cost() {
-  return cost;
-}
-string RobotPart::get_type() {
-  return type;
-}
-string RobotPart::get_name() {
-  return name;
-}
 
 string RobotPart::dtos(double num, int precision) {
   stringstream ss;
@@ -54,6 +45,7 @@ class Arm : public RobotPart {
   public:
     Arm(string t, string n, int m, double c, double w, string d, string i, double m_p)
       : RobotPart(t, n, m, c, w, d, i), max_power(m_p) { }
+    double getMaxPower() { return max_power; }
     string part_to_string();
   private:
     double max_power;
@@ -70,6 +62,8 @@ class Battery : public RobotPart {
   public:
     Battery(string t, string n, int m, double c, double w, string d, string i, double p, double m_e)
       : RobotPart(t, n, m, c, w, d, i), power_available(p), max_energy(m_e) { }
+    double getPowerAvailable() { return power_available; }
+    double getMaxEnergy() { return max_energy; }
     string part_to_string();
   private:
     double power_available;
@@ -87,6 +81,7 @@ class Head : public RobotPart {
   public:
     Head(string t, string n, int m, double c, double w, string d, string i, double p)
       :  RobotPart(t, n, m, c, w, d, i), power(p) { }
+    double getPower() { return power; }
     string part_to_string();
   private:
     double power;
@@ -103,6 +98,7 @@ class Locomotor : public RobotPart {
   public:
     Locomotor(string t, string n, int m, double c, double w, string d, string i, double m_p)
       : RobotPart(t, n, m, c, w, d, i), max_power(m_p) { }
+    double getMaxPower() { return max_power; }
     string part_to_string();
   private:
     double max_power;
@@ -119,6 +115,9 @@ class Torso : public RobotPart {
   public:
     Torso(string t, string n, int m, double c, double w, string d, string i, int b, int m_a)
       :  RobotPart(t, n, m, c, w, d, i), battery_compartments(b), max_arms(m_a) { }
+    int getBatteryCompartments() { return battery_compartments; }
+    int getMaxArms() { return max_arms; }
+
     string part_to_string();
   private:
     int battery_compartments;
@@ -136,6 +135,11 @@ class RobotModel {
   public:
     RobotModel(string n, int m, RobotPart* t, RobotPart* h, RobotPart* l, RobotPart* a, RobotPart* b, int numOfB, int numOfA)
       :  name(n), model_number(m), torso(t), head(h), locomotor(l), arm(a), battery(b), num_of_batteries(numOfB), num_of_arms(numOfA) { }
+    RobotPart* getTorso() { return torso; }
+    RobotPart* getHead() { return head; }
+    RobotPart* getLocomotor() { return locomotor; }
+    RobotPart* getArm() { return arm; }
+    RobotPart* getBattery() { return battery; }
     double cost();
     double max_speed();
     double max_battery_life();
@@ -151,7 +155,7 @@ class RobotModel {
     int num_of_arms;
 };
 double RobotModel::cost() {
-  double cost = torso->get_cost()+head->get_cost()+locomotor->get_cost()+(num_of_arms*arm->get_cost())+(num_of_batteries*battery->get_cost());
+  double cost = torso->getCost()+head->getCost()+locomotor->getCost()+(num_of_arms*arm->getCost())+(num_of_batteries*battery->getCost());
   return cost;
 }
 // /////////////////////////////////////
@@ -162,6 +166,7 @@ class View {
     View(vector<RobotPart*>& rps) : robotparts(rps) { }
     string get_main_menu();
     string get_part_menu();
+    string get_model_menu();
     string get_part_list();
     string get_part_list(string type);
   private:
@@ -196,6 +201,17 @@ string View::get_part_menu() {
 )";
   return menu;
 }
+string View::get_model_menu() {
+  string menu = R"(
+
+  Create Robot Model
+  ------------------
+  1 Create Model
+
+  0 Exit to Main Menu
+)";
+  return menu;
+}
 string View::get_part_list() {
   string output;
   for(int i = 0; i < robotparts.size(); i++) {
@@ -206,7 +222,7 @@ string View::get_part_list() {
 string View::get_part_list(string type) {
   string output;
   for(int i = 0; i < robotparts.size(); i++) {
-    if(robotparts[i]->get_type() == type)
+    if(robotparts[i]->getType() == type)
       output += robotparts[i]->part_to_string();
   }
   return output;
@@ -216,14 +232,14 @@ string View::get_part_list(string type) {
 // /////////////////////////////////////
 class Controller {
   public:
-    Controller(vector<RobotPart*>& rps, View& view) : robotparts(rps), view(view)  { }
+    Controller(vector<RobotPart*>& rps, vector<RobotModel*> rms, View& view)
+     : robotparts(rps), robotmodels(rms), view(view)  { }
     void cli();
     void execute_cmd(int cmd);
     void part_interface();
     void create_part(int choice);
     void model_interface();
     void create_model(int choice);
-    get_part(string type);
   private:
     double get_double(string prompt);
     double get_double(string prompt, double max_double);
@@ -231,9 +247,10 @@ class Controller {
     int get_int(string prompt, int max_int);
     int get_int(string prompt, int min_int, int max_int);
     string get_string(string prompt);
+    int get_part(string type);
 
     vector<RobotPart*>& robotparts;
-    RobotModel& robotmodel;
+    vector<RobotModel*>& robotmodels;
     View& view;
 };
 
@@ -322,7 +339,7 @@ void Controller::create_part(int choice) {
   int model_number;
   double cost, weight;
 
-  name = get_string("Name? ");
+  name = get_string("Part Name? ");
   model_number = get_int("Model Number? ");
   cost = get_double("Cost[$]? ");
   weight = get_double("Weight[lbs]? ");
@@ -384,19 +401,73 @@ void Controller::model_interface() {
   int choice = -1;
   string prompt = view.get_model_menu();
   while (choice != 0) {
-    choice = get_int(prompt, 5)
+    choice = get_int(prompt, 2);
     create_model(choice);
   }
   cout << "Returning to main menu...\n";
 }
 void Controller::create_model(int choice) {
+  if(choice == 0) return;
   if(robotparts.size() < 5) {
-    cout << "Fatal Error - Less than 5 parts have been initialized.";
+    cout << "Fatal Error - Less than 5 parts exist in the shop\'s inventory.";
     return;
   }
 
+  string name, type;
+  int model_number, num_of_arms, num_of_batteries, partIndex;
+  RobotPart* torso;
+  RobotPart* head;
+  RobotPart* locomotor;
+  RobotPart* arm;
+  RobotPart* battery;
+
+  RobotModel* model;
+
+  name = get_string("Model Name? ");
+  model_number = get_int("Model Number? ");
+
+  type = "Torso";
+  partIndex = get_part(type);
+  if(partIndex >= 0)
+    torso = robotparts[partIndex];
+  else
+    return;
+
+  type = "Head";
+  partIndex = get_part(type);
+  if(partIndex >= 0)
+    head = robotparts[partIndex];
+  else
+    return;
+
+  type = "Locomotor";
+  partIndex = get_part(type);
+  if(partIndex >= 0)
+    locomotor = robotparts[partIndex];
+  else
+    return;
+
+  type = "Arm";
+  partIndex = get_part(type);
+  if(partIndex >= 0)
+    arm = robotparts[partIndex];
+  else
+    return;
+
+  num_of_arms = get_int("How many arms? ", 1, torso->getMaxArms());
+
+  type = "Battery";
+  partIndex = get_part(type);
+  if(partIndex >= 0)
+    battery = robotparts[partIndex];
+  else
+    return;
+
+  num_of_batteries = get_int("How many batteries? ", 1, torso->getBatteryCompartments());
+
+  model = new RobotModel{name, model_number, torso, head, locomotor, arm, battery, num_of_batteries, num_of_arms};
 }
-void Contrller::get_part(string type) {
+int Controller::get_part(string type) {
   string partName, prompt;
   bool partExists = false;
   int partIndex;
@@ -407,19 +478,24 @@ void Contrller::get_part(string type) {
   cout << view.get_part_list(type);
   partName = get_string(prompt);
   for(int i = 0; i < robotparts.size(); i++) {
-    if(robotparts[i]->get_name() == partName) {
+    if(robotparts[i]->getName() == partName) {
+      //Resolve potential name ambiguity here
       partExists = true;
-      index = i;
-      break;
+      partIndex = i;
     }
   }
 
-  //Resolve potential name ambiguity here
+  if(!partExists) {
+    cout << "Fatal Error - Invalid part name.";
+    return -1;
+  }
+  return partIndex;
 }
 
 int main() {
   vector<RobotPart*> rps;
+  vector<RobotModel*> rms;
   View view{rps};
-  Controller controller{rps, view};
+  Controller controller{rps, rms, view};
   controller.cli();
 }

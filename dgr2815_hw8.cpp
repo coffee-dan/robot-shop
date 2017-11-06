@@ -35,7 +35,7 @@ class RobotPart {
     string image_filename;
 };
 string RobotPart::to_string() {
-  string output = name+" - $"+dtos(cost, 2)+"\nModel #"+std::to_string(model_number)+" - "+image_filename;
+  string output = name+", Model #"+std::to_string(model_number)+"\n"+image_filename+", Cost : $"+dtos(cost, 2);
   output += "\nDescription : "+description+"\nWeight : "+dtos(weight, 2)+" [Lbs]\n";
   return output;
 }
@@ -53,7 +53,7 @@ class Arm : public RobotPart {
 };
 string Arm::part_to_string() {
   string output = RobotPart::to_string();
-  return type+" : "+output+"\nMax Power : "+dtos(max_power, 2)+" [W]\n\n";
+  return type+" : "+output+"Max Power : "+dtos(max_power, 2)+" [W]\n\n";
 }
 // /////////////////////////////////////
 //          B A T T E R Y
@@ -71,7 +71,7 @@ class Battery : public RobotPart {
 };
 string Battery::part_to_string() {
   string output = RobotPart::to_string();
-  return type+" : "+output +"\nPower Available : "+std::to_string(power_available)+" [W]\nMax Energy : "+dtos(max_energy, 2)+" [kWh]\n\n";
+  return type+" : "+output +"Power Available : "+std::to_string(power_available)+" [W], Max Energy : "+dtos(max_energy, 2)+" [kWh]\n\n";
 }
 // /////////////////////////////////////
 //             H E A D
@@ -87,7 +87,7 @@ class Head : public RobotPart {
 };
 string Head::part_to_string() {
   string output = RobotPart::to_string();
-  return type+" : "+output +"\nPower : "+dtos(power, 2)+" [W]\n\n";
+  return type+" : "+output +"Power : "+dtos(power, 2)+" [W]\n\n";
 }
 // /////////////////////////////////////
 //         L O C O M O T O R
@@ -103,7 +103,7 @@ class Locomotor : public RobotPart {
 };
 string Locomotor::part_to_string() {
   string output = RobotPart::to_string();
-  return type+" : "+output +"\nMax Power : "+dtos(max_power, 2)+" [W]\n\n";
+  return type+" : "+output +"Max Power : "+dtos(max_power, 2)+" [W]\n\n";
 }
 // /////////////////////////////////////
 //            T O R S O
@@ -122,20 +122,20 @@ class Torso : public RobotPart {
 };
 string Torso::part_to_string() {
   string output = RobotPart::to_string();
-  return type+" : "+output +"\nBattery Compartments : "+std::to_string(battery_compartments)+"\nMax Arms : "+std::to_string(max_arms)+"\n\n";
+  return type+" : "+output +"Battery Compartments : "+std::to_string(battery_compartments)+", Max Arms : "+std::to_string(max_arms)+"\n\n";
 }
 // /////////////////////////////////////
 //         R O B O T   M O D E L
 // /////////////////////////////////////
 class RobotModel {
   public:
-    RobotModel(string n, int m, RobotPart* t, RobotPart* h, RobotPart* l, RobotPart* a, RobotPart* b, int numOfB, int numOfA)
-      :  name(n), model_number(m), torso(t), head(h), locomotor(l), arm(a), battery(b), num_of_batteries(numOfB), num_of_arms(numOfA) { }
+    RobotModel(string n, int m, RobotPart* t, RobotPart* h, RobotPart* l, vector<RobotPart*> a, vector<RobotPart*> b, int numOfB, int numOfA)
+      :  name(n), model_number(m), torso(t), head(h), locomotor(l), arms(a), batteries(b), num_of_batteries(numOfB), num_of_arms(numOfA) { }
     RobotPart* getTorso() { return torso; }
     RobotPart* getHead() { return head; }
     RobotPart* getLocomotor() { return locomotor; }
-    RobotPart* getArm() { return arm; }
-    RobotPart* getBattery() { return battery; }
+    RobotPart* getArm(int index) { return arms[index]; }
+    RobotPart* getBattery(int index) { return batteries[index]; }
     double cost();
     double max_speed();
     double max_battery_life();
@@ -146,25 +146,33 @@ class RobotModel {
     RobotPart* torso;
     RobotPart* head;
     RobotPart* locomotor;
-    RobotPart* arm;
-    RobotPart* battery;
-    int num_of_batteries;
+    vector<RobotPart*> arms;
+    vector<RobotPart*> batteries;
     int num_of_arms;
+    int num_of_batteries;
 };
 
 double RobotModel::cost() {
   double cost = torso->getCost() + head->getCost();
-  cost += locomotor->getCost() + (num_of_arms * arm->getCost());
-  cost += (num_of_batteries * battery->getCost());
+  cost += locomotor->getCost();
+  for(int i = 0; i < num_of_arms; i++) {
+    cost += arms[i]->getCost();
+  }
+  for(int i = 0; i < num_of_batteries; i++) {
+    cost += batteries[i]->getCost();
+  }
   return cost;
 }
 string RobotModel::to_string() {
-  string output = "Model : "+name+" - $"+dtos(cost(), 2);
-  output += "\nModel #"+std::to_string(model_number)+"\n";
-  output += torso->part_to_string()+""+head->part_to_string();
+  string output = "Robot Model : "+name+", Model #"+std::to_string(model_number);
+  output += "- $"+dtos(cost(), 2)+"\n\n"+torso->part_to_string()+""+head->part_to_string();
   output += locomotor->part_to_string();
-  output += std::to_string(num_of_arms)+" "+arm->part_to_string();
-  output += std::to_string(num_of_batteries)+" "+battery->part_to_string();
+  for(int i = 0; i < num_of_arms; i++) {
+    output += "\tArm "+std::to_string(i)+" of "+std::to_string(num_of_arms)+"\n"+arms[i]->part_to_string();
+  }
+  for(int i = 0; i < num_of_batteries; i++) {
+    output += "\tBattery "+std::to_string(i)+" of "+std::to_string(num_of_arms)+"\n"+batteries[i]->part_to_string();
+  }
   return output;
 }
 // /////////////////////////////////////
@@ -207,7 +215,7 @@ string View::get_create_menu() {
   1 Part
   2 Model
   3 Easter Egg
-  0 Exit to Main Menu
+  0 Return to Main Menu
 
   )";
   return menu;
@@ -222,7 +230,7 @@ string View::get_part_menu() {
   3 Head
   4 Locomotor
   5 Torso
-  0 Exit to Main Menu
+  0 Return to Main Menu
   )";
   return menu;
 }
@@ -233,7 +241,7 @@ string View::get_report_menu() {
   ------
   1 Part
   2 Model
-  0 Exit to Main Menu
+  0 Return to Main Menu
 
   )";
   return menu;
@@ -348,24 +356,33 @@ string Controller::get_string(string prompt) {
 int Controller::get_part(string type) {
   string partName, prompt;
   bool partExists = false;
+  bool partsAvailable = false;
   int partIndex;
 
   prompt = "Select a part.\n"+type+" name? ";
-  cout << "Accessing "+type+" information...\n\n";
 
+  cout << "Accessing "+type+" information...\n\n";
   cout << view.get_part_list(type);
-  partName = get_string(prompt);
-  for(int i = 0; i < robotparts.size(); i++) {
-    if(robotparts[i]->getName() == partName) {
-      //Resolve potential name ambiguity here
-      partExists = true;
-      partIndex = i;
+
+
+
+  while(true) {
+    partName = get_string(prompt);
+    for(int i = 0; i < robotparts.size(); i++) {
+      if(robotparts[i]->getType() == type) partsAvailable = true;
+      if((robotparts[i]->getType() == type) & (robotparts[i]->getName() == partName)) {
+        partExists = true;
+        partIndex = i;
+      }
     }
+
+    if(!partsAvailable) break;
+    if(partExists & partsAvailable) break;
+    cout << "Error - Please re-enter part name.\n";
   }
 
-  if(!partExists) {
-    cout << "Fatal Error - Invalid part name.";
-    cout << "Please restart the robot model creation process.";
+  if(!partsAvailable) {
+    cout << "Fatal Error - No "+type+" parts available.\n";
     return -1;
   }
   return partIndex;
@@ -411,22 +428,35 @@ void Controller::create_runner(int choice) {
     this->create_model();
   } else if(choice == 3) {
     cout << "Filling databases for testing...\n";
-    RobotPart* part;
+    string image_filename = "image.png";
+    RobotPart* arm;
+    RobotPart* battery;
+    RobotPart* head;
+    RobotPart* locomotor;
+    RobotPart* torso;
+
+    vector<RobotPart*> arms;
+    vector<RobotPart*> batteries;
+
     RobotModel* model;
 
-    string image_filename = "image.png";
-    part = new Arm{"Arm", "ACME Arm", 1000, 49.95, 15, "Standard Issue", image_filename, 8999};
-    robotparts.push_back(part);
-    part = new Battery{"Battery", "ACME Battery", 1000, 14.95, 0.5, "Standard Issue", image_filename, 12000, 56000};
-    robotparts.push_back(part);
-    part = new Head{"Head", "ACME Head", 1000, 149.95, 25, "Standard Issue", image_filename, 8999};
-    robotparts.push_back(part);
-    part = new Locomotor{"Locomotor", "ACME Locomotor", 1000, 249.95, 75.5, "Standard Issue", image_filename, 8999};
-    robotparts.push_back(part);
-    part = new Torso{"Torso", "ACME Torso", 1000, 99.95, 120, "Standard Issue", image_filename, 2, 2};
-    robotparts.push_back(part);
+    arm = new Arm{"Arm", "ACME Arm", 1000, 49.95, 15, "Standard Issue", image_filename, 8999};
+    robotparts.push_back(arm);
+    arms.push_back(arm);
+    arms.push_back(arm);
+    battery = new Battery{"Battery", "ACME Battery", 1000, 14.95, 0.5, "Standard Issue", image_filename, 12000, 56000};
+    robotparts.push_back(battery);
+    batteries.push_back(battery);
+    batteries.push_back(battery);
 
-    model = new RobotModel{"ACME Robo", 1000, robotparts[4], robotparts[2], robotparts[3], robotparts[0], robotparts[1], 2, 2};
+    head = new Head{"Head", "ACME Head", 1000, 149.95, 25, "Standard Issue", image_filename, 8999};
+    robotparts.push_back(head);
+    locomotor = new Locomotor{"Locomotor", "ACME Locomotor", 1000, 249.95, 75.5, "Standard Issue", image_filename, 8999};
+    robotparts.push_back(locomotor);
+    torso = new Torso{"Torso", "ACME Torso", 1000, 99.95, 120, "Standard Issue", image_filename, 2, 2};
+    robotparts.push_back(torso);
+
+    model = new RobotModel{"ACME Robo", 1000, torso, head, locomotor, arms, batteries, 2, 2};
     robotmodels.push_back(model);
 
   }
@@ -518,8 +548,8 @@ void Controller::create_model() {
   RobotPart* torso;
   RobotPart* head;
   RobotPart* locomotor;
-  RobotPart* arm;
-  RobotPart* battery;
+  vector<RobotPart*> arms;
+  vector<RobotPart*> batteries;
 
   RobotModel* model;
 
@@ -547,25 +577,31 @@ void Controller::create_model() {
   else
     return;
 
-  type = "Arm";
-  partIndex = get_part(type);
-  if(partIndex >= 0)
-    arm = robotparts[partIndex];
-  else
-    return;
   maxArms = static_cast<Torso*>(torso)->getMaxArms();
   numOfArms = get_int("How many arms? ", 1, maxArms);
 
-  type = "Battery";
-  partIndex = get_part(type);
-  if(partIndex >= 0)
-    battery = robotparts[partIndex];
-  else
-    return;
+  for(int i = 0; i < numOfArms; i++) {
+    type = "Arm";
+    partIndex = get_part(type);
+    if(partIndex >= 0)
+      arms.push_back(robotparts[partIndex]);
+    else
+      return;
+  }
+
   maxBatteries = static_cast<Torso*>(torso)->getBatteryCompartments();
   numOfBatteries = get_int("How many batteries? ", 1, maxBatteries);
 
-  model = new RobotModel{name, model_number, torso, head, locomotor, arm, battery, numOfBatteries, numOfArms};
+  for(int i = 0; i < numOfBatteries; i++) {
+    type = "Battery";
+    partIndex = get_part(type);
+    if(partIndex >= 0)
+      batteries.push_back(robotparts[partIndex]);
+    else
+      return;
+  }
+
+  model = new RobotModel{name, model_number, torso, head, locomotor, arms, batteries, numOfBatteries, numOfArms};
   robotmodels.push_back(model);
 
 }

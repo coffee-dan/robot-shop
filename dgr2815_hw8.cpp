@@ -34,7 +34,6 @@ class RobotPart {
     string description;
     string image_filename;
 };
-
 string RobotPart::to_string() {
   string output = name+" - $"+dtos(cost, 2)+"\nModel #"+std::to_string(model_number)+" - "+image_filename;
   output += "\nDescription : "+description+"\nWeight : "+dtos(weight, 2)+" [Lbs]\n";
@@ -52,7 +51,6 @@ class Arm : public RobotPart {
   private:
     double max_power;
 };
-
 string Arm::part_to_string() {
   string output = RobotPart::to_string();
   return type+" : "+output+"\nMax Power : "+dtos(max_power, 2)+" [W]\n\n";
@@ -71,7 +69,6 @@ class Battery : public RobotPart {
     double power_available;
     double max_energy;
 };
-
 string Battery::part_to_string() {
   string output = RobotPart::to_string();
   return type+" : "+output +"\nPower Available : "+std::to_string(power_available)+" [W]\nMax Energy : "+dtos(max_energy, 2)+" [kWh]\n\n";
@@ -88,7 +85,6 @@ class Head : public RobotPart {
   private:
     double power;
 };
-
 string Head::part_to_string() {
   string output = RobotPart::to_string();
   return type+" : "+output +"\nPower : "+dtos(power, 2)+" [W]\n\n";
@@ -105,7 +101,6 @@ class Locomotor : public RobotPart {
   private:
     double max_power;
 };
-
 string Locomotor::part_to_string() {
   string output = RobotPart::to_string();
   return type+" : "+output +"\nMax Power : "+dtos(max_power, 2)+" [W]\n\n";
@@ -125,7 +120,6 @@ class Torso : public RobotPart {
     int battery_compartments;
     int max_arms;
 };
-
 string Torso::part_to_string() {
   string output = RobotPart::to_string();
   return type+" : "+output +"\nBattery Compartments : "+std::to_string(battery_compartments)+"\nMax Arms : "+std::to_string(max_arms)+"\n\n";
@@ -157,6 +151,7 @@ class RobotModel {
     int num_of_batteries;
     int num_of_arms;
 };
+
 double RobotModel::cost() {
   double cost = torso->getCost() + head->getCost();
   cost += locomotor->getCost() + (num_of_arms * arm->getCost());
@@ -239,7 +234,7 @@ string View::get_report_menu() {
   1 Part
   2 Model
   0 Exit to Main Menu
-  
+
   )";
   return menu;
 }

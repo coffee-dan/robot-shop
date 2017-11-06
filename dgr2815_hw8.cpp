@@ -71,7 +71,7 @@ class Battery : public RobotPart {
 };
 string Battery::part_to_string() {
   string output = RobotPart::to_string();
-  return type+" : "+output +"Power Available : "+std::to_string(power_available)+" [W], Max Energy : "+dtos(max_energy, 2)+" [kWh]\n\n";
+  return type+" : "+output +"Power Available : "+dtos(power_available, 2)+" [W], Max Energy : "+dtos(max_energy, 2)+" [kWh]\n\n";
 }
 // /////////////////////////////////////
 //             H E A D
@@ -165,16 +165,30 @@ double RobotModel::cost() {
   }
   return cost;
 }
+double RobotModel::max_speed() {
+  return static_cast<Locomotor*>(locomotor)->getMaxSpeed();
+}
+double RobotModel::max_battery_life() {
+  double max_energy;
+  for(int i = 0; i < num_of_batteries; i++) {
+    max_energy += static_cast<Battery*>(batteries[i])->getMaxEnergy();
+  }
+  return max_energy;
+}
 string RobotModel::to_string() {
   string output = "Robot Model : "+name+", Model #"+std::to_string(model_number);
-  output += "- $"+dtos(cost(), 2)+"\n\n"+torso->part_to_string()+""+head->part_to_string();
-  output += locomotor->part_to_string();
+  output += "- $"+dtos(cost(), 2)+"\nMax Speed : "+dtos(max_speed(), 2)+" [mph], Max Battery Life : ";
+  output += dtos(max_battery_life(), 2)+"\n\n";
+
+  output += torso->part_to_string()+""+head->part_to_string()+""+locomotor->part_to_string();
+
   for(int i = 0; i < num_of_arms; i++) {
-    output += "\tArm "+std::to_string(i)+" of "+std::to_string(num_of_arms)+"\n"+arms[i]->part_to_string();
+    output += "\tArm "+std::to_string(i+1)+" of "+std::to_string(num_of_arms)+"\n"+arms[i]->part_to_string();
   }
   for(int i = 0; i < num_of_batteries; i++) {
-    output += "\tBattery "+std::to_string(i)+" of "+std::to_string(num_of_arms)+"\n"+batteries[i]->part_to_string();
+    output += "\tBattery "+std::to_string(i+1)+" of "+std::to_string(num_of_arms)+"\n"+batteries[i]->part_to_string();
   }
+
   return output;
 }
 // /////////////////////////////////////
@@ -451,7 +465,7 @@ void Controller::create_runner(int choice) {
 
     head = new Head{"Head", "ACME Head", 1000, 149.95, 25, "Standard Issue", image_filename, 8999};
     robotparts.push_back(head);
-    locomotor = new Locomotor{"Locomotor", "ACME Locomotor", 1000, 249.95, 75.5, "Standard Issue", image_filename, 8999};
+    locomotor = new Locomotor{"Locomotor", "ACME Locomotor", 1000, 249.95, 75.5, "Standard Issue", image_filename, 8999, 500.5};
     robotparts.push_back(locomotor);
     torso = new Torso{"Torso", "ACME Torso", 1000, 99.95, 120, "Standard Issue", image_filename, 2, 2};
     robotparts.push_back(torso);

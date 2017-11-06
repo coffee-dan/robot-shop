@@ -94,16 +94,18 @@ string Head::part_to_string() {
 // /////////////////////////////////////
 class Locomotor : public RobotPart {
   public:
-    Locomotor(string t, string n, int m, double c, double w, string d, string i, double m_p)
-      : RobotPart(t, n, m, c, w, d, i), max_power(m_p) { }
+    Locomotor(string t, string n, int m, double c, double w, string d, string i, double m_p, double m_s)
+      : RobotPart(t, n, m, c, w, d, i), max_power(m_p), max_speed(m_s) { }
     double getMaxPower() { return max_power; }
+    double getMaxSpeed() { return max_speed; }
     string part_to_string();
   private:
     double max_power;
+    double max_speed;
 };
 string Locomotor::part_to_string() {
   string output = RobotPart::to_string();
-  return type+" : "+output +"Max Power : "+dtos(max_power, 2)+" [W]\n\n";
+  return type+" : "+output +"Max Power : "+dtos(max_power, 2)+" [W], Max Speed : "+dtos(max_speed, 2)+" [mph]\n\n";
 }
 // /////////////////////////////////////
 //            T O R S O
@@ -364,8 +366,6 @@ int Controller::get_part(string type) {
   cout << "Accessing "+type+" information...\n\n";
   cout << view.get_part_list(type);
 
-
-
   while(true) {
     partName = get_string(prompt);
     for(int i = 0; i < robotparts.size(); i++) {
@@ -516,11 +516,12 @@ void Controller::create_part(int choice) {
 
   } else if(choice == 4) {
     cout << "Gathering unique locomotor information...\n";
-    double max_power;
+    double max_power, max_speed;
 
     type = "Locomotor";
     max_power = get_double("Max Power[W]? ");
-    part = new Locomotor{type, name, model_number, cost, weight, description, image_filename, max_power};
+    max_speed = get_double("Max Speed[mph]? ");
+    part = new Locomotor{type, name, model_number, cost, weight, description, image_filename, max_power, max_speed};
     robotparts.push_back(part);
 
   } else if(choice == 5) {

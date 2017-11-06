@@ -36,7 +36,7 @@ class RobotPart {
 };
 string RobotPart::to_string() {
   string output = name+", Model #"+std::to_string(model_number)+"\n"+image_filename+", Cost : $"+dtos(cost, 2);
-  output += "\nDescription : "+description+"\nWeight : "+dtos(weight, 2)+" [Lbs]\n";
+  output += "\nDescription : "+description+"\nWeight : "+dtos(weight, 2)+" [lbs]\n";
   return output;
 }
 // /////////////////////////////////////
@@ -247,6 +247,7 @@ string View::get_part_menu() {
   4 Locomotor
   5 Torso
   0 Return to Main Menu
+  
   )";
   return menu;
 }
@@ -378,9 +379,10 @@ int Controller::get_part(string type) {
   prompt = "Select a part.\n"+type+" name? ";
 
   cout << "Accessing "+type+" information...\n\n";
-  cout << view.get_part_list(type);
 
   while(true) {
+    cout << view.get_part_list(type);
+
     partName = get_string(prompt);
     for(int i = 0; i < robotparts.size(); i++) {
       if(robotparts[i]->getType() == type) partsAvailable = true;

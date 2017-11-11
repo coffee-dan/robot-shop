@@ -11,6 +11,57 @@ string dtos(double num, int precision) {
   ss << fixed << setprecision(precision) << num;
   return ss.str();
 }
+double get_double(string prompt) {
+  double result;
+  while(true) {
+    cout << prompt;
+    cin >> result;
+    cin.ignore();
+    if(0 < result) break;
+    cout << "Please enter a value greater than zero" << endl;
+  }
+  return result;
+}
+int get_int(string prompt) {
+  int result;
+  while(true) {
+    cout << prompt;
+    cin >> result;
+    cin.ignore();
+    if(0 < result) break;
+    cout << "Please enter an integer greater than zero" << endl;
+  }
+  return result;
+}
+int get_int(string prompt, int max_int) {
+  int result;
+  while(true) {
+    cout << prompt;
+    cin >> result;
+    cin.ignore(); // consume \n
+    if (0 <= result && result <= max_int) break;
+    cout << "Please enter an integer between 0 and " << max_int << endl;
+  }
+  return result;
+}
+int get_int(string prompt, int min_int, int max_int) {
+  int result;
+  while(true) {
+    cout << prompt;
+    cin >> result;
+    cin.ignore(); // consume \n
+    if (min_int <= result && result <= max_int) break;
+    cout << "Please enter an integer between "<< min_int << " and " << max_int << endl;
+  }
+  return result;
+}
+string get_string(string prompt) {
+  string result;
+  cout << prompt;
+  getline(cin, result);
+  return result;
+}
+
 // /////////////////////////////////////
 //        R O B O T   P A R T
 // /////////////////////////////////////
@@ -192,302 +243,66 @@ string RobotModel::to_string() {
   return output;
 }
 // /////////////////////////////////////
-//              V I E W
+//              S H O P
 // /////////////////////////////////////
-class View {
+class Shop {
   public:
-    View(vector<RobotPart*>& rps, vector<RobotModel*>& rms)
+    Shop(vector<RobotPart*>& rps, vector<RobotModel*> rms)
      : robotparts(rps), robotmodels(rms) { }
-    string get_main_menu();
-    string get_create_menu();
-    string get_part_menu();
-    string get_report_menu();
+    void create_new_robot_part(int choice);
+    RobotPart* get_part(int index) { return robotparts[index]; }
+    string part_to_string(int index);
+    string part_list_to_string();
+    string part_list_to_string(string type);
+    int num_of_parts() { return robotparts.size(); }
 
-    string get_part_list();
-    string get_part_list(string type);
-    string get_model_list();
+    void create_new_robot_model(int choice);
+    RobotModel* get_model(int index) { return robotmodels[index]; }
+    string model_to_string(int index);
+    string model_list_to_string();
+    int num_of_models() { return robotmodels.size(); }
+
+    void easter_egg();
   private:
+    int get_robot_part(string type);
+
     vector<RobotPart*>& robotparts;
     vector<RobotModel*>& robotmodels;
 };
 
-string View::get_main_menu() {
-  string menu =
-  R"(
-  Main Menu
-  ---------
-  1 Create
-  2 Report
-  0 Exit Program
-
-  )";
-  return menu;
+string Shop::part_to_string(int index) {
+  return robotparts[index]->part_to_string();
 }
-string View::get_create_menu() {
-  string menu =
-  R"(
-  Create
-  ------
-  1 Part
-  2 Model
-  3 Easter Egg
-  0 Return to Main Menu
-
-  )";
-  return menu;
-}
-string View::get_part_menu() {
-  string menu =
-  R"(
-  Select Part
-  -----------
-  1 Arm
-  2 Battery
-  3 Head
-  4 Locomotor
-  5 Torso
-  0 Return to Main Menu
-  
-  )";
-  return menu;
-}
-string View::get_report_menu() {
-  string menu =
-  R"(
-  Report
-  ------
-  1 Part
-  2 Model
-  0 Return to Main Menu
-
-  )";
-  return menu;
-}
-string View::get_part_list() {
+string Shop::part_list_to_string() {
   if(robotparts.size() == 0) return "No parts available\n";
   string output;
   for(int i = 0; i < robotparts.size(); i++) {
-    output += robotparts[i]->part_to_string();
+    output += part_to_string(i);
   }
   return output;
 }
-string View::get_part_list(string type) {
+string Shop::part_list_to_string(string type) {
   if(robotparts.size() == 0) return "No parts available\n";
   string output;
   for(int i = 0; i < robotparts.size(); i++) {
     if(robotparts[i]->getType() == type)
-      output += robotparts[i]->part_to_string();
+      output += part_to_string(i);
   }
   return output;
 }
-string View::get_model_list() {
+string Shop::model_to_string(int index) {
+  return robotmodels[index]->to_string();
+}
+string Shop::model_list_to_string() {
   if(robotmodels.size() == 0) return "No models available.\n";
   string output;
   for(int i = 0; i < robotmodels.size(); i++) {
-    output += robotmodels[i]->to_string();
+    output += model_to_string(i);
   }
   return output;
 }
-// /////////////////////////////////////
-//         C O N T R O L L E R
-// /////////////////////////////////////
-class Controller {
-  public:
-    Controller(vector<RobotPart*>& rps, vector<RobotModel*>& rms, View& view)
-     : robotparts(rps), robotmodels(rms), view(view)  { }
-    void main_interface();
-    void main_runner(int choice);
 
-    void create_interface();
-    void create_runner(int choice);
-    void part_interface();
-    void create_part(int choice);
-    void create_model();
-
-    void report_interface();
-    void report_runner(int choice);
-  private:
-    double get_double(string prompt);
-    double get_double(string prompt, double max_double);
-    int get_int(string prompt);
-    int get_int(string prompt, int max_int);
-    int get_int(string prompt, int min_int, int max_int);
-    string get_string(string prompt);
-    int get_part(string type);
-
-    vector<RobotPart*>& robotparts;
-    vector<RobotModel*>& robotmodels;
-    View& view;
-};
-
-double Controller::get_double(string prompt) {
-  double result;
-  while(true) {
-    cout << prompt;
-    cin >> result;
-    cin.ignore();
-    if(0 < result) break;
-    cout << "Please enter a value greater than zero" << endl;
-  }
-  return result;
-}
-int Controller::get_int(string prompt) {
-  int result;
-  while(true) {
-    cout << prompt;
-    cin >> result;
-    cin.ignore();
-    if(0 < result) break;
-    cout << "Please enter an integer greater than zero" << endl;
-  }
-  return result;
-}
-int Controller::get_int(string prompt, int max_int) {
-  int result;
-  while(true) {
-    cout << prompt;
-    cin >> result;
-    cin.ignore(); // consume \n
-    if (0 <= result && result <= max_int) break;
-    cout << "Please enter an integer between 0 and " << max_int << endl;
-  }
-  return result;
-}
-int Controller::get_int(string prompt, int min_int, int max_int) {
-  int result;
-  while(true) {
-    cout << prompt;
-    cin >> result;
-    cin.ignore(); // consume \n
-    if (min_int <= result && result <= max_int) break;
-    cout << "Please enter an integer between "<< min_int << " and " << max_int << endl;
-  }
-  return result;
-}
-string Controller::get_string(string prompt) {
-  string result;
-  cout << prompt;
-  getline(cin, result);
-  return result;
-}
-int Controller::get_part(string type) {
-  string partName, prompt;
-  bool partExists = false;
-  bool partsAvailable = false;
-  int partIndex;
-
-  prompt = "Select a part.\n"+type+" name? ";
-
-  cout << "Accessing "+type+" information...\n\n";
-
-  while(true) {
-    cout << view.get_part_list(type);
-
-    partName = get_string(prompt);
-    for(int i = 0; i < robotparts.size(); i++) {
-      if(robotparts[i]->getType() == type) partsAvailable = true;
-      if((robotparts[i]->getType() == type) & (robotparts[i]->getName() == partName)) {
-        partExists = true;
-        partIndex = i;
-      }
-    }
-
-    if(!partsAvailable) break;
-    if(partExists & partsAvailable) break;
-    cout << "Error - Please re-enter part name.\n";
-  }
-
-  if(!partsAvailable) {
-    cout << "Fatal Error - No "+type+" parts available.\n";
-    return -1;
-  }
-  return partIndex;
-}
-
-void Controller::main_interface() {
-  int choice = -1;
-  string prompt = view.get_main_menu();
-  while(choice != 0) {
-    choice = get_int(prompt, 2);
-    main_runner(choice);
-  }
-  cout << "Exitting program...\n";
-}
-void Controller::main_runner(int choice) {
-  if(choice == 0) return;
-  if(choice == 1) {
-    cout << "Navigating to create menu...\n";
-    create_interface();
-  } else if (choice == 2) {
-    cout << "Navigating to report menu...\n";
-    this->report_interface();
-  }
-}
-
-void Controller::create_interface() {
-  int choice = -1;
-  string prompt = view.get_create_menu();
-  while (choice != 0) {
-    choice = get_int(prompt, 3);
-    create_runner(choice);
-  }
-  cout << "Returning to main menu...\n";
-}
-void Controller::create_runner(int choice) {
-  if(choice == 0) return;
-
-  if(choice == 1) {
-    cout << "Navigating to part menu...\n";
-    this->part_interface();
-  } else if(choice == 2) {
-    cout << "Initializing robot model...\n";
-    this->create_model();
-  } else if(choice == 3) {
-    cout << "Filling databases for testing...\n";
-    string image_filename = "image.png";
-    RobotPart* arm;
-    RobotPart* battery;
-    RobotPart* head;
-    RobotPart* locomotor;
-    RobotPart* torso;
-
-    vector<RobotPart*> arms;
-    vector<RobotPart*> batteries;
-
-    RobotModel* model;
-
-    arm = new Arm{"Arm", "ACME Arm", 1000, 49.95, 15, "Standard Issue", image_filename, 8999};
-    robotparts.push_back(arm);
-    arms.push_back(arm);
-    arms.push_back(arm);
-    battery = new Battery{"Battery", "ACME Battery", 1000, 14.95, 0.5, "Standard Issue", image_filename, 12000, 56000};
-    robotparts.push_back(battery);
-    batteries.push_back(battery);
-    batteries.push_back(battery);
-
-    head = new Head{"Head", "ACME Head", 1000, 149.95, 25, "Standard Issue", image_filename, 8999};
-    robotparts.push_back(head);
-    locomotor = new Locomotor{"Locomotor", "ACME Locomotor", 1000, 249.95, 75.5, "Standard Issue", image_filename, 8999, 500.5};
-    robotparts.push_back(locomotor);
-    torso = new Torso{"Torso", "ACME Torso", 1000, 99.95, 120, "Standard Issue", image_filename, 2, 2};
-    robotparts.push_back(torso);
-
-    model = new RobotModel{"ACME Robo", 1000, torso, head, locomotor, arms, batteries, 2, 2};
-    robotmodels.push_back(model);
-
-  }
-}
-void Controller::part_interface() {
-  int choice = -1;
-  string prompt = view.get_part_menu();
-  while(choice != 0) {
-    choice = get_int(prompt, 5);
-    create_part(choice);
-  }
-  cout << "Returning to main menu...\n";
-}
-void Controller::create_part(int choice) {
-  if(choice == 0) return;
+void Shop::create_new_robot_part(int choice) {
   cout << "Gathering default robot part information...\n";
   string name, description, type, image_filename;
   int model_number;
@@ -552,7 +367,40 @@ void Controller::create_part(int choice) {
 
   }
 }
-void Controller::create_model() {
+int Shop::get_robot_part(string type) {
+  string partName, prompt;
+  bool partExists = false;
+  bool partsAvailable = false;
+  int partIndex;
+
+  prompt = "Select a part.\n"+type+" name? ";
+
+  cout << "Accessing "+type+" information...\n\n";
+
+  while(true) {
+    cout << part_list_to_string(type);
+
+    partName = get_string(prompt);
+    for(int i = 0; i < robotparts.size(); i++) {
+      if(robotparts[i]->getType() == type) partsAvailable = true;
+      if((robotparts[i]->getType() == type) & (robotparts[i]->getName() == partName)) {
+        partExists = true;
+        partIndex = i;
+      }
+    }
+
+    if(!partsAvailable) break;
+    if(partExists & partsAvailable) break;
+    cout << "Error - Please re-enter part name.\n";
+  }
+
+  if(!partsAvailable) {
+    cout << "Fatal Error - No "+type+" parts available.\n";
+    return -1;
+  }
+  return partIndex;
+}
+void Shop::create_new_robot_model(int choice) {
   if(robotparts.size() < 5) {
     cout << "Fatal Error - Less than 5 parts exist in the shop\'s inventory.";
     return;
@@ -574,21 +422,21 @@ void Controller::create_model() {
   model_number = get_int("Model Number? ");
 
   type = "Torso";
-  partIndex = get_part(type);
+  partIndex = get_robot_part(type);
   if(partIndex >= 0)
     torso = robotparts[partIndex];
   else
     return;
 
   type = "Head";
-  partIndex = get_part(type);
+  partIndex = get_robot_part(type);
   if(partIndex >= 0)
     head = robotparts[partIndex];
   else
     return;
 
   type = "Locomotor";
-  partIndex = get_part(type);
+  partIndex = get_robot_part(type);
   if(partIndex >= 0)
     locomotor = robotparts[partIndex];
   else
@@ -599,7 +447,7 @@ void Controller::create_model() {
 
   for(int i = 0; i < numOfArms; i++) {
     type = "Arm";
-    partIndex = get_part(type);
+    partIndex = get_robot_part(type);
     if(partIndex >= 0)
       arms.push_back(robotparts[partIndex]);
     else
@@ -611,7 +459,7 @@ void Controller::create_model() {
 
   for(int i = 0; i < numOfBatteries; i++) {
     type = "Battery";
-    partIndex = get_part(type);
+    partIndex = get_robot_part(type);
     if(partIndex >= 0)
       batteries.push_back(robotparts[partIndex]);
     else
@@ -621,6 +469,197 @@ void Controller::create_model() {
   model = new RobotModel{name, model_number, torso, head, locomotor, arms, batteries, numOfBatteries, numOfArms};
   robotmodels.push_back(model);
 
+}
+
+void Shop::easter_egg() {
+  cout << "Filling databases for testing...\n";
+  string image_filename = "image.png";
+  RobotPart* arm;
+  RobotPart* battery;
+  RobotPart* head;
+  RobotPart* locomotor;
+  RobotPart* torso;
+
+  vector<RobotPart*> arms;
+  vector<RobotPart*> batteries;
+
+  RobotModel* model;
+
+  arm = new Arm{"Arm", "ACME Arm", 1000, 49.95, 15, "Standard Issue", image_filename, 8999};
+  robotparts.push_back(arm);
+  arms.push_back(arm);
+  arms.push_back(arm);
+  battery = new Battery{"Battery", "ACME Battery", 1000, 14.95, 0.5, "Standard Issue", image_filename, 12000, 56000};
+  robotparts.push_back(battery);
+  batteries.push_back(battery);
+  batteries.push_back(battery);
+
+  head = new Head{"Head", "ACME Head", 1000, 149.95, 25, "Standard Issue", image_filename, 8999};
+  robotparts.push_back(head);
+  locomotor = new Locomotor{"Locomotor", "ACME Locomotor", 1000, 249.95, 75.5, "Standard Issue", image_filename, 8999, 500.5};
+  robotparts.push_back(locomotor);
+  torso = new Torso{"Torso", "ACME Torso", 1000, 99.95, 120, "Standard Issue", image_filename, 2, 2};
+  robotparts.push_back(torso);
+
+  model = new RobotModel{"ACME Robo", 1000, torso, head, locomotor, arms, batteries, 2, 2};
+  robotmodels.push_back(model);
+}
+// /////////////////////////////////////
+//              V I E W
+// /////////////////////////////////////
+class View {
+  public:
+    View(Shop& shop)
+     : shop(shop) { }
+    string get_main_menu();
+    string get_create_menu();
+    string get_part_menu();
+    string get_report_menu();
+
+    string get_part_list();
+    string get_part_list(string type);
+    string get_model_list();
+  private:
+    Shop& shop;
+};
+
+string View::get_main_menu() {
+  string menu =
+  R"(
+  Main Menu
+  ---------
+  1 Create
+  2 Report
+  0 Exit Program
+
+  )";
+  return menu;
+}
+string View::get_create_menu() {
+  string menu =
+  R"(
+  Create
+  ------
+  1 Part
+  2 Model
+  3 Easter Egg
+  0 Return to Main Menu
+
+  )";
+  return menu;
+}
+string View::get_part_menu() {
+  string menu =
+  R"(
+  Select Part
+  -----------
+  1 Arm
+  2 Battery
+  3 Head
+  4 Locomotor
+  5 Torso
+  0 Return to Main Menu
+
+  )";
+  return menu;
+}
+string View::get_report_menu() {
+  string menu =
+  R"(
+  Report
+  ------
+  1 Part
+  2 Model
+  0 Return to Main Menu
+
+  )";
+  return menu;
+}
+
+string View::get_part_list() {
+  return shop.part_list_to_string();
+}
+string View::get_part_list(string type) {
+
+}
+string View::get_model_list() {
+  return shop.model_list_to_string();
+}
+// /////////////////////////////////////
+//         C O N T R O L L E R
+// /////////////////////////////////////
+class Controller {
+  public:
+    Controller(Shop& shop, View& view)
+     : shop(shop), view(view)  { }
+    void main_interface();
+    void main_runner(int choice);
+
+    void create_interface();
+    void create_runner(int choice);
+    void part_interface();
+    void part_runner(int choice);
+
+    void report_interface();
+    void report_runner(int choice);
+  private:
+    Shop& shop;
+    View& view;
+};
+
+void Controller::main_interface() {
+  int choice = -1;
+  string prompt = view.get_main_menu();
+  while(choice != 0) {
+    choice = get_int(prompt, 2);
+    main_runner(choice);
+  }
+  cout << "Exitting program...\n";
+}
+void Controller::main_runner(int choice) {
+  if(choice == 0) return;
+  if(choice == 1) {
+    cout << "Navigating to create menu...\n";
+    create_interface();
+  } else if (choice == 2) {
+    cout << "Navigating to report menu...\n";
+    report_interface();
+  }
+}
+
+void Controller::create_interface() {
+  int choice = -1;
+  string prompt = view.get_create_menu();
+  while (choice != 0) {
+    choice = get_int(prompt, 3);
+    create_runner(choice);
+  }
+  cout << "Returning to main menu...\n";
+}
+void Controller::create_runner(int choice) {
+  if(choice == 0) return;
+  if(choice == 1) {
+    cout << "Navigating to part menu...\n";
+    part_interface();
+  } else if(choice == 2) {
+    cout << "Initializing robot model...\n";
+    shop.create_new_robot_model(choice);
+  } else if(choice == 3) {
+    shop.easter_egg();
+  }
+}
+void Controller::part_interface() {
+  int choice = -1;
+  string prompt = view.get_part_menu();
+  while(choice != 0) {
+    choice = get_int(prompt, 5);
+    part_runner(choice);
+  }
+  cout << "Returning to main menu...\n";
+}
+void Controller::part_runner(int choice) {
+  if(choice == 0) return;
+  shop.create_new_robot_part(choice);
 }
 
 void Controller::report_interface() {
@@ -646,7 +685,8 @@ void Controller::report_runner(int choice) {
 int main() {
   vector<RobotPart*> rps;
   vector<RobotModel*> rms;
-  View view{rps, rms};
-  Controller controller{rps, rms, view};
+  Shop shop{rps, rms};
+  View view{shop};
+  Controller controller{shop, view};
   controller.main_interface();
 }

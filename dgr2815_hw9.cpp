@@ -68,7 +68,9 @@ string get_string(string prompt) {
 class RobotPart {
   public:
     RobotPart(string t, string n, int m, double c, double w, string d, string i)
-      : type(t), name(n), model_number(m), cost(c), weight(w), description(d), image_filename(i) { }
+     : type(t), name(n), model_number(m), cost(c), weight(w), description(d), image_filename(i) { }
+    RobotPart()
+     : type(), name(), model_number(), cost(), description(), image_filename() { }
     string getType() { return type; }
     string getName() { return name; }
     double getCost() { return cost; }
@@ -96,7 +98,9 @@ string RobotPart::to_string() {
 class Arm : public RobotPart {
   public:
     Arm(string t, string n, int m, double c, double w, string d, string i, double m_p)
-      : RobotPart(t, n, m, c, w, d, i), max_power(m_p) { }
+     : RobotPart(t, n, m, c, w, d, i), max_power(m_p) { }
+    Arm()
+     : RobotPart(), max_power() { }
     double getMaxPower() { return max_power; }
     string part_to_string();
   private:
@@ -112,7 +116,9 @@ string Arm::part_to_string() {
 class Battery : public RobotPart {
   public:
     Battery(string t, string n, int m, double c, double w, string d, string i, double p, double m_e)
-      : RobotPart(t, n, m, c, w, d, i), power_available(p), max_energy(m_e) { }
+     : RobotPart(t, n, m, c, w, d, i), power_available(p), max_energy(m_e) { }
+    Battery()
+     : RobotPart(), power_available(), max_energy() { }
     double getPowerAvailable() { return power_available; }
     double getMaxEnergy() { return max_energy; }
     string part_to_string();
@@ -130,7 +136,9 @@ string Battery::part_to_string() {
 class Head : public RobotPart {
   public:
     Head(string t, string n, int m, double c, double w, string d, string i, double p)
-      :  RobotPart(t, n, m, c, w, d, i), power(p) { }
+     : RobotPart(t, n, m, c, w, d, i), power(p) { }
+    Head()
+     : RobotPart(), power() { }
     double getPower() { return power; }
     string part_to_string();
   private:
@@ -146,7 +154,9 @@ string Head::part_to_string() {
 class Locomotor : public RobotPart {
   public:
     Locomotor(string t, string n, int m, double c, double w, string d, string i, double m_p, double m_s)
-      : RobotPart(t, n, m, c, w, d, i), max_power(m_p), max_speed(m_s) { }
+     : RobotPart(t, n, m, c, w, d, i), max_power(m_p), max_speed(m_s) { }
+    Locomotor()
+     : RobotPart(), max_power(), max_speed() { }
     double getMaxPower() { return max_power; }
     double getMaxSpeed() { return max_speed; }
     string part_to_string();
@@ -164,7 +174,9 @@ string Locomotor::part_to_string() {
 class Torso : public RobotPart {
   public:
     Torso(string t, string n, int m, double c, double w, string d, string i, int b, int m_a)
-      :  RobotPart(t, n, m, c, w, d, i), battery_compartments(b), max_arms(m_a) { }
+     : RobotPart(t, n, m, c, w, d, i), battery_compartments(b), max_arms(m_a) { }
+    Torso()
+     : RobotPart(), battery_compartments(), max_arms() { }
     int getBatteryCompartments() { return battery_compartments; }
     int getMaxArms() { return max_arms; }
 
@@ -183,12 +195,15 @@ string Torso::part_to_string() {
 class RobotModel {
   public:
     RobotModel(string n, int m, RobotPart* t, RobotPart* h, RobotPart* l, vector<RobotPart*> a, vector<RobotPart*> b, int numOfB, int numOfA)
-      :  name(n), model_number(m), torso(t), head(h), locomotor(l), arms(a), batteries(b), num_of_batteries(numOfB), num_of_arms(numOfA) { }
+     : name(n), model_number(m), torso(t), head(h), locomotor(l), arms(a), batteries(b), num_of_batteries(numOfB), num_of_arms(numOfA) { }
+    RobotModel()
+     : name(), model_number(), torso(), head(), locomotor(), arms(), batteries(), num_of_batteries(), num_of_arms() { }
     RobotPart* getTorso() { return torso; }
     RobotPart* getHead() { return head; }
     RobotPart* getLocomotor() { return locomotor; }
     RobotPart* getArm(int index) { return arms[index]; }
     RobotPart* getBattery(int index) { return batteries[index]; }
+    string getName() { return name; }
     double total_weight();
     double cost_of_parts();
     double max_speed();
@@ -277,7 +292,9 @@ string RobotModel::to_string() {
 class Customer {
   public:
     Customer(string _name, int _customer_num, string _phone_num, string _email)
-    : name(_name), customer_number(_customer_num), phone_number(_phone_num), email_address(_email) { }
+     : name(_name), customer_number(_customer_num), phone_number(_phone_num), email_address(_email) { }
+    Customer()
+     : name(), customer_number(), phone_number(), email_address() { }
     string getName() { return name; }
     int getCustomerNumber() { return customer_number; }
     string getPhoneNumber() { return phone_number; }
@@ -290,7 +307,7 @@ class Customer {
     string email_address;
 };
 string Customer::to_string() {
-  string output = name+" - "+std::to_string(customer_number)+'\n';
+  string output = std::to_string(customer_number)+" - "+name+'\n';
   output += phone_number+", "+email_address;
   return output;
 }
@@ -298,15 +315,55 @@ string Customer::to_string() {
 //     S A L E S   A S S O C I A T E
 // /////////////////////////////////////
 class SalesAssociate {
-
+  public:
+    SalesAssociate(string _name, int _employee_num)
+     : name(_name), employee_number(_employee_num) { }
+    SalesAssociate()
+     : name(), employee_number() { }
+    string getName() { return name; }
+    int getEmployeeNumber() { return employee_number; }
+    string to_string();
+  private:
+    string name;
+    int employee_number;
 };
+string SalesAssociate::to_string() {
+  string output = std::to_string(employee_number)+" - "+name+'\n';
+  return output;
+}
+// /////////////////////////////////////
+//             O R D E R
+// /////////////////////////////////////
+class Order {
+  public:
+    Order(int _order_num, string _date, Customer c, SalesAssociate sa, RobotModel rm, int _status)
+     : order_number(_order_num), date(_date), customer(c), salesAssociate(sa), robotModel(rm), status(_status) { }
+    Order()
+     : order_number(), date(), customer(), salesAssociate(), robotModel(), status() { }
+    string to_string();
+  private:
+    int order_number;
+    string date;
+    Customer customer;
+    SalesAssociate salesAssociate;
+    RobotModel robotModel;
+    int status;
+};
+string Order::to_string() {
+  string output = std::to_string(order_number)+" - "+date+'\n';
+  output += "Customer: "+customer.to_string()+'\n';
+  output += "Sales Associate: "+salesAssociate.to_string()+'\n';
+  output += "Robot Model: "+robotModel.to_string()+'\n';
+  output += "Current status: "+std::to_string(status)+'\n';
+  return output;
+}
 // /////////////////////////////////////
 //              S H O P
 // /////////////////////////////////////
 class Shop {
   public:
-    Shop(vector<RobotPart*>& rps, vector<RobotModel*> rms, vector<Customer*> cs)
-     : robotparts(rps), robotmodels(rms), customers(cs) { }
+    Shop(vector<RobotPart*>& rps, vector<RobotModel*> rms, vector<Customer*> cs, vector<SalesAssociate*> sas, vector<Order*> os)
+     : robotparts(rps), robotmodels(rms), customers(cs), salesassociates(sas), orders(os) { }
 
     void create_new_robot_part(int choice);
     RobotPart* get_part(int index) { return robotparts[index]; }
@@ -327,13 +384,30 @@ class Shop {
     string customer_list_to_string();
     int num_of_customers() { return customers.size(); }
 
+    void create_new_sales_associate();
+    SalesAssociate* get_sales_associate(int index) { return salesassociates[index]; }
+    string sales_associate_to_string(int index);
+    string sales_associate_list_to_string();
+    int num_of_sales_associates() { return salesassociates.size(); }
+
+    void create_new_order();
+    Order* get_order(int index) { return orders[index]; }
+    string order_to_string(int index);
+    string order_list_to_string();
+    int num_of_orders() { return orders.size(); }
+
     void easter_egg();
   private:
     int get_robot_part(string type);
+    int get_customer();
+    int get_sales_associate();
+    int get_robot_model();
 
     vector<RobotPart*>& robotparts;
     vector<RobotModel*>& robotmodels;
     vector<Customer*>& customers;
+    vector<SalesAssociate*>& salesassociates;
+    vector<Order*>& orders;
 };
 
 void Shop::create_new_robot_part(int choice) {
@@ -400,39 +474,6 @@ void Shop::create_new_robot_part(int choice) {
     robotparts.push_back(part);
 
   }
-}
-int Shop::get_robot_part(string type) {
-  string partName, prompt;
-  bool partExists = false;
-  bool partsAvailable = false;
-  int partIndex;
-
-  prompt = "Select a part.\n"+type+" name? ";
-
-  cout << "Accessing "+type+" information...\n\n";
-
-  while(true) {
-    cout << part_list_to_string(type);
-
-    partName = get_string(prompt);
-    for(int i = 0; i < robotparts.size(); i++) {
-      if(robotparts[i]->getType() == type) partsAvailable = true;
-      if((robotparts[i]->getType() == type) & (robotparts[i]->getName() == partName)) {
-        partExists = true;
-        partIndex = i;
-      }
-    }
-
-    if(!partsAvailable) break;
-    if(partExists & partsAvailable) break;
-    cout << "Error - Please re-enter part name.\n";
-  }
-
-  if(!partsAvailable) {
-    cout << "Fatal Error - No "+type+" parts available.\n";
-    return -1;
-  }
-  return partIndex;
 }
 string Shop::part_to_string(int index) {
   return robotparts[index]->part_to_string();
@@ -555,7 +596,7 @@ string Shop::customer_to_string(int index) {
   return customers[index]->to_string();
 }
 string Shop::customer_list_to_string() {
-  if(customers.size() == 0) return "No customer accounts exist.\n";
+  if(customers.size() == 0) return "No customer accounts on record.\n";
   string output;
   for(int i = 0; i < customers.size(); i++) {
     output += customer_to_string(i);
@@ -563,6 +604,179 @@ string Shop::customer_list_to_string() {
   return output;
 }
 
+void Shop::create_new_sales_associate() {
+  cout << "Gathering employee information...\n";
+  string name;
+  int employee_number;
+
+  name = get_string("Name[First and Last]? ");
+  employee_number = get_int("Employee ID#" );
+
+  SalesAssociate* salesAssociate = new SalesAssociate{name, employee_number};
+  salesassociates.push_back(salesAssociate);
+}
+string Shop::sales_associate_to_string(int index) {
+  return salesassociates[index]->to_string();
+}
+string Shop::sales_associate_list_to_string() {
+  if(salesassociates.size() == 0) return "No sales associates on record.\n";
+  string output;
+  for(int i = 0; i < salesassociates.size(); i++) {
+    output += sales_associate_to_string(i);
+  }
+  return output;
+}
+
+void Shop::create_new_order() {
+  if(customers.size() == 0) {
+    cerr << "Error - Order cannot be created as no customer accounts exist.\n";
+    return;
+  }
+  if(salesassociates.size() == 0) {
+    cerr << "Error - Order cannot be created as no sales associate accounts exist.\n";
+    return;
+  }
+  if(robotmodels.size() == 0) {
+    cerr << "Error - Order cannot be created as no robot models are in the shop.\n";
+  }
+  cout << "Gathering order information...\n";
+  string date;
+  int order_number, status, index;
+  Customer customer;
+  SalesAssociate salesAssociate;
+  RobotModel robotModel;
+
+  date = get_string("Today's Date? ");
+  order_number = get_int("Order ID#? ");
+
+  index = get_customer();
+  customer = *customers[index];
+
+  index = get_sales_associate();
+  salesAssociate = *salesassociates[index];
+
+  index = get_robot_model();
+  robotModel = *robotmodels[index];
+
+}
+string Shop::order_to_string(int index) {
+  return orders[index]->to_string();
+}
+string Shop::order_list_to_string() {
+  if(orders.size() == 0) return "No orders on record.\n";
+  string output;
+  for(int i = 0; i < orders.size(); i++) {
+    output += order_to_string(i);
+  }
+  return output;
+}
+
+int Shop::get_robot_part(string type) {
+  string partName, prompt;
+  bool partExists = false;
+  bool partsAvailable = false;
+  int partIndex;
+
+  prompt = "Select a part.\n"+type+" name? ";
+
+  cout << "Accessing "+type+" information...\n\n";
+
+  while(true) {
+    cout << part_list_to_string(type);
+
+    partName = get_string(prompt);
+    for(int i = 0; i < robotparts.size(); i++) {
+      if(robotparts[i]->getType() == type) partsAvailable = true;
+      if((robotparts[i]->getType() == type) & (robotparts[i]->getName() == partName)) {
+        partExists = true;
+        partIndex = i;
+      }
+    }
+
+    if(!partsAvailable) break;
+    if(partExists & partsAvailable) break;
+    cout << "Error - Please re-enter part name.\n";
+  }
+
+  if(!partsAvailable) {
+    cout << "Fatal Error - No "+type+" parts available.\n";
+    return -1;
+  }
+  return partIndex;
+}
+int Shop::get_customer() {
+  string customerName, prompt;
+  bool customerExists;
+  int customerIndex;
+
+  prompt = "Please select a customer account. ";
+
+  cout << "Retrieving customer account information...\n\n";
+  while(true) {
+    cout << customer_list_to_string();
+
+    customerName = get_string(prompt);
+    for(int i = 0; i < customers.size(); i++) {
+      if(customers[i]->getName() == customerName) {
+        customerExists == true;
+        customerIndex = i;
+      }
+    }
+
+    if(customerExists) break;
+    cout << "Error - Please re-enter customer name.\n";
+  }
+  return customerIndex;
+}
+int Shop::get_sales_associate() {
+  string associateName, prompt;
+  bool associateExists;
+  int associateIndex;
+
+  prompt = "Which sales associate helped you? ";
+
+  cout << "Retrieving sales associate information...\n\n";
+  while(true) {
+    cout << sales_associate_list_to_string();
+
+    associateName = get_string(prompt);
+    for(int i = 0; i < salesassociates.size(); i++) {
+      if(salesassociates[i]->getName() == associateName) {
+        associateExists = true;
+        associateIndex = i;
+      }
+    }
+
+    if(associateExists) break;
+    cout << "Error - Please re-enter associate name.\n";
+  }
+  return associateIndex;
+}
+int Shop::get_robot_model() {
+  string modelName, prompt;
+  bool modelExists;
+  int modelIndex;
+
+  prompt = "Which robot model would you like to purchase? ";
+
+  cout << "Retrieving robot model information...\n\n";
+  while(true) {
+    cout << model_list_to_string();
+
+    modelName = get_string(prompt);
+    for(int i = 0; i < robotmodels.size(); i++) {
+      if(robotmodels[i]->getName() == modelName) {
+        modelExists = true;
+        modelIndex = i;
+      }
+    }
+
+    if(modelExists == true) break;
+    cout << "Error - Please re-enter model name.\n";
+  }
+
+  return modelIndex;
+}
 void Shop::easter_egg() {
   cout << "Filling databases for testing...\n";
   string image_filename = "image.png";
@@ -612,6 +826,8 @@ class View {
     string get_part_list(string type);
     string get_model_list();
     string get_customer_list();
+    string get_sales_associate_list();
+    string get_order_list();
   private:
     Shop& shop;
 };
@@ -633,10 +849,12 @@ string View::get_create_menu() {
   R"(
   Create
   ------
-  1 Customer
-  2 Part
-  3 Model
-  4 Easter Egg
+  1 Order
+  2 Customer
+  3 Sales Associate
+  4 Part
+  5 Model
+  6 Easter Egg
   0 Return to Main Menu
 
   )";
@@ -662,9 +880,11 @@ string View::get_report_menu() {
   R"(
   Report
   ------
-  1 Custmer
-  2 Part
-  3 Model
+  1 Order
+  2 Customer
+  3 Sales Associate
+  4 Part
+  5 Model
   0 Return to Main Menu
 
   )";
@@ -682,6 +902,12 @@ string View::get_model_list() {
 }
 string View::get_customer_list() {
   return shop.customer_list_to_string();
+}
+string View::get_sales_associate_list() {
+  return shop.sales_associate_list_to_string();
+}
+string View::get_order_list() {
+  return shop.order_list_to_string();
 }
 // /////////////////////////////////////
 //         C O N T R O L L E R
@@ -729,7 +955,7 @@ void Controller::create_interface() {
   int choice = -1;
   string prompt = view.get_create_menu();
   while (choice != 0) {
-    choice = get_int(prompt, 4);
+    choice = get_int(prompt, 6);
     create_runner(choice);
   }
   cout << "Returning to main menu...\n";
@@ -738,15 +964,21 @@ void Controller::create_runner(int choice) {
   if(choice == 0) return;
 
   if(choice == 1) {
+    cout << "Initializing order...\n";
+    shop.create_new_order();
+  } else if(choice == 1) {
     cout << "Initializing customer account...\n";
     shop.create_new_customer();
   } else if(choice == 2) {
+    cout << "Initializing sales associate record...\n";
+    shop.create_new_sales_associate();
+  } else if(choice == 3) {
     cout << "Navigating to part menu...\n";
     part_interface();
-  } else if(choice == 3) {
+  } else if(choice == 4) {
     cout << "Initializing robot model...\n";
     shop.create_new_robot_model();
-  } else if(choice == 4) {
+  } else if(choice == 5) {
     shop.easter_egg();
   }
 }
@@ -768,20 +1000,27 @@ void Controller::report_interface() {
   int choice = -1;
   string prompt = view.get_report_menu();
   while(choice != 0) {
-    choice = get_int(prompt, 3);
+    choice = get_int(prompt, 5);
     report_runner(choice);
   }
   cout << "Returning to main menu...\n";
 }
 void Controller::report_runner(int choice) {
   if(choice == 0) return;
+
   if(choice == 1) {
+    cout << "Retrieving order data...\n";
+    cout << view.get_order_list();
+  } else if(choice == 2) {
     cout << "Retrieving customer data...\n";
     cout << view.get_customer_list();
-  } else if(choice == 2) {
+  } else if(choice == 3) {
+    cout << "Retrieving sales associate data...\n";
+    cout << view.get_sales_associate_list();
+  } else if(choice == 4) {
     cout << "Retrieving part data...\n";
     cout << view.get_part_list();
-  } else if(choice == 3) {
+  } else if(choice == 5) {
     cout << "Retrieving model data...\n";
     cout << view.get_model_list();
   }
@@ -791,7 +1030,10 @@ int main() {
   vector<RobotPart*> rps;
   vector<RobotModel*> rms;
   vector<Customer*> cs;
-  Shop shop{rps, rms, cs};
+  vector<SalesAssociate*> sas;
+  vector<Order*> os;
+
+  Shop shop{rps, rms, cs, sas, os};
   View view{shop};
   Controller controller{shop, view};
   controller.main_interface();

@@ -79,6 +79,8 @@ class RobotPart {
 
     string to_string();
     virtual string part_to_string()=0;
+    string export_data();
+    virtual string export_part()=0;
   protected:
     string type;
     string name;
@@ -93,6 +95,9 @@ string RobotPart::to_string() {
   output += "\nDescription : "+description+"\nWeight : "+dtos(weight, 2)+" [lbs]\n";
   return output;
 }
+string RobotPart::export_data() {
+  return type+','+name+','+std::to_string(model_number)+','+dtos(cost,2)+','+dtos(weight,2)+','+description+','+image_filename;
+}
 // /////////////////////////////////////
 //              A R M
 // /////////////////////////////////////
@@ -104,12 +109,17 @@ class Arm : public RobotPart {
      : RobotPart(), max_power() { }
     double getMaxPower() { return max_power; }
     string part_to_string();
+    string export_part();
   private:
     double max_power;
 };
 string Arm::part_to_string() {
   string output = RobotPart::to_string();
   return type+" : "+output+"Max Power : "+dtos(max_power, 2)+" [W]\n\n";
+}
+string Arm::export_data() {
+  string output = RobotPart::export_data();
+  return output+','+dtos(max_power,2)+'\n';
 }
 // /////////////////////////////////////
 //          B A T T E R Y
@@ -123,6 +133,7 @@ class Battery : public RobotPart {
     double getPowerAvailable() { return power_available; }
     double getMaxEnergy() { return max_energy; }
     string part_to_string();
+    string export_part();
   private:
     double power_available;
     double max_energy;
@@ -130,6 +141,10 @@ class Battery : public RobotPart {
 string Battery::part_to_string() {
   string output = RobotPart::to_string();
   return type+" : "+output +"Power Available : "+dtos(power_available, 2)+" [W], Max Energy : "+dtos(max_energy, 2)+" [kWh]\n\n";
+}
+string Battery::export_part() {
+  string output = RobotPart::export_data();
+  return output+','+dtos(power_available,2)+','+dtos(max_energy,2)+'\n';
 }
 // /////////////////////////////////////
 //             H E A D
@@ -142,12 +157,17 @@ class Head : public RobotPart {
      : RobotPart(), power() { }
     double getPower() { return power; }
     string part_to_string();
+    string export_part();
   private:
     double power;
 };
 string Head::part_to_string() {
   string output = RobotPart::to_string();
   return type+" : "+output +"Power : "+dtos(power, 2)+" [W]\n\n";
+}
+string Head::export_part() {
+  string output = RobotPart::export_data();
+  return output+','+dtos(power,2)+'\n';
 }
 // /////////////////////////////////////
 //         L O C O M O T O R
@@ -161,6 +181,7 @@ class Locomotor : public RobotPart {
     double getMaxPower() { return max_power; }
     double getMaxSpeed() { return max_speed; }
     string part_to_string();
+    string export_part();
   private:
     double max_power;
     double max_speed;
@@ -168,6 +189,10 @@ class Locomotor : public RobotPart {
 string Locomotor::part_to_string() {
   string output = RobotPart::to_string();
   return type+" : "+output +"Max Power : "+dtos(max_power, 2)+" [W], Max Speed : "+dtos(max_speed, 2)+" [mph]\n\n";
+}
+string Locomotor::export_part() {
+  string output = RobotPart::export_data();
+  return output+','+dtos(max_power,2)+','+dtos(max_speed,2)+'\n';
 }
 // /////////////////////////////////////
 //            T O R S O
@@ -180,8 +205,8 @@ class Torso : public RobotPart {
      : RobotPart(), battery_compartments(), max_arms() { }
     int getBatteryCompartments() { return battery_compartments; }
     int getMaxArms() { return max_arms; }
-
     string part_to_string();
+    string export_part();
   private:
     int battery_compartments;
     int max_arms;
@@ -189,6 +214,10 @@ class Torso : public RobotPart {
 string Torso::part_to_string() {
   string output = RobotPart::to_string();
   return type+" : "+output +"Battery Compartments : "+std::to_string(battery_compartments)+", Max Arms : "+std::to_string(max_arms)+"\n\n";
+}
+string Torso::export_part() {
+  string output = RobotPart::export_data();
+  return output+','+std::to_string(battery_compartments)+','+std::to_string(max_arms)+'\n';
 }
 // /////////////////////////////////////
 //         R O B O T   M O D E L
@@ -210,6 +239,7 @@ class RobotModel {
     double max_speed();
     double battery_life();
     string to_string();
+    string basic_to_string();
   private:
     string name;
     int model_number;
@@ -273,7 +303,7 @@ double RobotModel::battery_life() {
 string RobotModel::to_string() {
   string output = "Robot Model : "+name+", Model #"+std::to_string(model_number);
   output += " - $"+dtos(cost_of_parts(), 2)+"\nMax Speed : "+dtos(max_speed(), 2)+" [mph], Max Battery Life : ";
-  output += dtos(battery_life(), 2)+"\n\n";
+  output += dtos(battery_life(), 2)+"[h]\n\n";
 
   output += torso->part_to_string()+""+head->part_to_string()+""+locomotor->part_to_string();
 
@@ -286,7 +316,12 @@ string RobotModel::to_string() {
 
   return output;
 }
-
+string RobotModel::basic_to_string() {
+  string output = "Robot Model : "+name+", Model #"+std::to_string(model_number);
+  output += " - $"+dtos(cost_of_parts(), 2)+"\nMax Speed : "+dtos(max_speed(), 2)+" [mph], Max Battery Life : ";
+  output += dtos(battery_life(), 2)+"[h]\n\n";
+  return output;
+}
 // /////////////////////////////////////
 //    B E L O V E D   C U S T O M E R
 // /////////////////////////////////////
@@ -308,8 +343,8 @@ class Customer {
     string email_address;
 };
 string Customer::to_string() {
-  string output = std::to_string(customer_number)+" - "+name+'\n';
-  output += phone_number+", "+email_address;
+  string output = "Customer #"+std::to_string(customer_number)+" - "+name+'\n';
+  output += phone_number+", "+email_address+'\n';
   return output;
 }
 // /////////////////////////////////////
@@ -329,7 +364,7 @@ class SalesAssociate {
     int employee_number;
 };
 string SalesAssociate::to_string() {
-  string output = std::to_string(employee_number)+" - "+name+'\n';
+  string output = "Sales Associate #"+std::to_string(employee_number)+" - "+name+'\n';
   return output;
 }
 // /////////////////////////////////////
@@ -351,11 +386,11 @@ class Order {
     int status;
 };
 string Order::to_string() {
-  string output = std::to_string(order_number)+" - "+date+'\n';
-  output += "Customer: "+customer.to_string()+'\n';
-  output += "Sales Associate: "+salesAssociate.to_string()+'\n';
-  output += "Robot Model: "+robotModel.to_string()+'\n';
-  output += "Current status: "+std::to_string(status)+'\n';
+  string output = "Order #"+std::to_string(order_number)+" - "+date+"\n\n";
+  output += customer.to_string()+'\n';
+  output += salesAssociate.to_string()+'\n';
+  output += robotModel.basic_to_string();
+  output += "Order status: "+std::to_string(status)+'\n';
   return output;
 }
 // /////////////////////////////////////
@@ -793,6 +828,9 @@ void Shop::easter_egg() {
   vector<RobotPart*> batteries;
 
   RobotModel* model;
+  Customer* customer;
+  SalesAssociate* associate;
+  Order* order;
 
   arm = new Arm{"Arm", "ACME Arm", 1000, 49.95, 15, "Standard Issue", image_filename, 8999};
   robotparts.push_back(arm);
@@ -812,6 +850,24 @@ void Shop::easter_egg() {
 
   model = new RobotModel{"ACME Robo", 1000, torso, head, locomotor, arms, batteries, 2, 2};
   robotmodels.push_back(model);
+
+  customer = new Customer{"John Smith", 100, "817-555-5555", "me@aol.com"};
+  customers.push_back(customer);
+
+  associate = new SalesAssociate{"David Williams", 50};
+  salesassociates.push_back(associate);
+
+  order = new Order{999, "January 2, 1997", *customer, *associate, *model, 1};
+  orders.push_back(order);
+}
+
+void save(string filename) {
+  ofstream file.open(filename);
+  file << std::to_string(robotparts.size()) << '\n';
+  for(int i = 0; i < robotparts.size(); i++) {
+
+  }
+  file.close();
 }
 // /////////////////////////////////////
 //              V I E W
@@ -842,6 +898,7 @@ string View::get_main_menu() {
   ---------
   1 Create
   2 Report
+  3 Save
   0 Exit Program
 
   )";
@@ -938,7 +995,7 @@ void Controller::main_interface() {
   int choice = -1;
   string prompt = view.get_main_menu();
   while(choice != 0) {
-    choice = get_int(prompt, 2);
+    choice = get_int(prompt, 3);
     main_runner(choice);
   }
   cout << "Exitting program...\n";
@@ -951,6 +1008,9 @@ void Controller::main_runner(int choice) {
   } else if (choice == 2) {
     cout << "Navigating to report menu...\n";
     report_interface();
+  } else if (choice == 3) {
+    cout << "Formatting data...\n";
+    shop.save("shop.txt");
   }
 }
 
@@ -1012,19 +1072,19 @@ void Controller::report_runner(int choice) {
   if(choice == 0) return;
 
   if(choice == 1) {
-    cout << "Retrieving order data...\n";
+    cout << "Retrieving order data...\n\n";
     cout << view.get_order_list();
   } else if(choice == 2) {
-    cout << "Retrieving customer data...\n";
+    cout << "Retrieving customer data...\n\n";
     cout << view.get_customer_list();
   } else if(choice == 3) {
-    cout << "Retrieving sales associate data...\n";
+    cout << "Retrieving sales associate data...\n\n";
     cout << view.get_sales_associate_list();
   } else if(choice == 4) {
-    cout << "Retrieving part data...\n";
+    cout << "Retrieving part data...\n\n";
     cout << view.get_part_list();
   } else if(choice == 5) {
-    cout << "Retrieving model data...\n";
+    cout << "Retrieving model data...\n\n";
     cout << view.get_model_list();
   }
 }

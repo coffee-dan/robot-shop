@@ -3,6 +3,7 @@
 #include <string>
 #include <sstream>
 #include <iomanip>
+#include <fstream>
 
 using namespace std;
 
@@ -396,6 +397,8 @@ class Shop {
     string order_list_to_string();
     int num_of_orders() { return orders.size(); }
 
+    void save(string filename);
+    void open(string filename);
     void easter_egg();
   private:
     int get_robot_part(string type);
@@ -966,19 +969,19 @@ void Controller::create_runner(int choice) {
   if(choice == 1) {
     cout << "Initializing order...\n";
     shop.create_new_order();
-  } else if(choice == 1) {
+  } else if(choice == 2) {
     cout << "Initializing customer account...\n";
     shop.create_new_customer();
-  } else if(choice == 2) {
+  } else if(choice == 3) {
     cout << "Initializing sales associate record...\n";
     shop.create_new_sales_associate();
-  } else if(choice == 3) {
+  } else if(choice == 4) {
     cout << "Navigating to part menu...\n";
     part_interface();
-  } else if(choice == 4) {
+  } else if(choice == 5) {
     cout << "Initializing robot model...\n";
     shop.create_new_robot_model();
-  } else if(choice == 5) {
+  } else if(choice == 6) {
     shop.easter_egg();
   }
 }

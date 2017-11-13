@@ -936,44 +936,56 @@ void Shop::open(string filename) {
     cout << "File was successfully opened.\n";
   }
   string input;
-  istringstream ss;
   int listCount;
   file >> listCount;
+  file.ignore();
   //Resolving RobotPart list data to vector elements
   string type, name, description, image_filename;
   int model_number;
   double cost, weight;
   for(int i = 0; i < listCount; i++) {
     file >> type;
-    getline(file, input);
-    file >> name;
+    file.ignore();
+    getline(file, name);
     file >> model_number;
+    file.ignore();
     file >> cost;
+    file.ignore();
     file >> weight;
-    file >> description;
+    file.ignore();
+    getline(file, description);
     file >> image_filename;
+    file.ignore();
     if(type == "Arm") {
       double max_power;
       file >> max_power;
+      file.ignore();
       robotparts.push_back(new Arm{type, name, model_number, cost, weight, description, image_filename, max_power});
     } else if(type == "Battery") {
       double power_available, max_energy;
       file >> power_available;
+      file.ignore();
       file >> max_energy;
+      file.ignore();
       robotparts.push_back(new Battery{type, name, model_number, cost, weight, description, image_filename, power_available, max_energy});
     } else if(type == "Head") {
       double power;
       file >> power;
+      file.ignore();
       robotparts.push_back(new Head{type, name, model_number, cost, weight, description, image_filename, power});
     } else if(type == "Locomotor") {
       double max_power, max_speed;
       file >> max_power;
+      file.ignore();
       file >> max_speed;
+      file.ignore();
       robotparts.push_back(new Locomotor{type, name, model_number, cost, weight, description, image_filename, max_power, max_speed});
     } else if(type == "Torso") {
       int battery_compartments, max_arms;
       file >> battery_compartments;
+      file.ignore();
       file >> max_arms;
+      file.ignore();
       robotparts.push_back(new Torso{type, name, model_number, cost, weight, description, image_filename, battery_compartments, max_arms});
     }
   }
@@ -987,20 +999,26 @@ void Shop::open(string filename) {
   vector<RobotPart*> batteries;
   file >> listCount;
   for(int i = 0; i < listCount; i++) {
-    file >> name;
+    getline(file, name);
     file >> model_number;
+    file.ignore();
     file >> part_id;
+    file.ignore();
     torso = robotparts[find_part("Torso", part_id)];
     file >> part_id;
+    file.ignore();
     head = robotparts[find_part("Head", part_id)];
     file >> part_id;
+    file.ignore();
     locomotor = robotparts[find_part("Locomotor", part_id)];
     file >> num_of_arms;
+    file.ignore();
     for(int i = 0; i < num_of_arms; i++) {
       file >> part_id;
       arms[i] = robotparts[find_part("Arm", part_id)];
     }
     file >> num_of_batteries;
+    file.ignore();
     for(int i = 0; i < num_of_batteries; i++) {
       file >> part_id;
       batteries[i] = robotparts[find_part("Battery", part_id)];
@@ -1011,19 +1029,23 @@ void Shop::open(string filename) {
   int customer_number;
   string phone_number, email_address;
   file >> listCount;
+  file.ignore();
   for(int i = 0; i < listCount; i++) {
-    file >> name;
+    getline(file, name);
     file >> customer_number;
-    file >> phone_number;
-    file >> email_address;
+    file.ignore();
+    getline(file, phone_number);
+    getline(file, email_address);
     customers.push_back(Customer{name, customer_number, phone_number, email_address});
   }
   //Resolving SalesAssociate list data to vector elements
   int employee_number;
   file >> listCount;
+  file.ignore();
   for(int i = 0; i < listCount; i++) {
-    file >> name;
+    getline(file, name);
     file >> employee_number;
+    file.ignore();
     salesassociates.push_back(SalesAssociate{name, employee_number});
   }
   //Resolving Order list data to vector elements
@@ -1034,18 +1056,23 @@ void Shop::open(string filename) {
   SalesAssociate salesAssociate;
   RobotModel robotModel;
   file >> listCount;
+  file.ignore();
   for(int i = 0; i < listCount; i++) {
     file >> order_number;
+    file.ignore();
     file >> date;
+    file.ignore();
     file >> customer_id;
+    file.ignore();
     customer = customers[find_customer(customer_id)];
     file >> associate_id;
+    file.ignore();
     salesAssociate = salesassociates[find_sales_associate(associate_id)];
     file >> model_id;
+    file.ignore();
     robotModel = robotmodels[find_robot_model(model_id)];
     orders.push_back(Order{order_number, date, customer, salesAssociate, robotModel, status});
   }
-  cout << "File successfully \"read\".\n";
 }
 int Shop::find_part(string type, int part_id) {
   string part_type;

@@ -97,7 +97,7 @@ string RobotPart::to_string() {
   return output;
 }
 string RobotPart::export_data() {
-  return type+'\n'+name+'\n'+std::to_string(model_number)+'\n'+dtos(cost,2)+'\n'+dtos(weight,2)+'\n'+description+'\n'+image_filename;
+  return type+'|'+name+'|'+std::to_string(model_number)+'|'+dtos(cost,2)+'|'+dtos(weight,2)+'|'+description+'|'+image_filename;
 }
 // /////////////////////////////////////
 //              A R M
@@ -120,7 +120,7 @@ string Arm::part_to_string() {
 }
 string Arm::export_part() {
   string output = RobotPart::export_data();
-  return output+'\n'+dtos(max_power,2)+'\n';
+  return output+'|'+dtos(max_power,2)+'|';
 }
 // /////////////////////////////////////
 //          B A T T E R Y
@@ -145,7 +145,7 @@ string Battery::part_to_string() {
 }
 string Battery::export_part() {
   string output = RobotPart::export_data();
-  return output+'\n'+dtos(power_available,2)+'\n'+dtos(max_energy,2)+'\n';
+  return output+'|'+dtos(power_available,2)+'|'+dtos(max_energy,2)+'|';
 }
 // /////////////////////////////////////
 //             H E A D
@@ -168,7 +168,7 @@ string Head::part_to_string() {
 }
 string Head::export_part() {
   string output = RobotPart::export_data();
-  return output+'\n'+dtos(power,2)+'\n';
+  return output+'|'+dtos(power,2)+'|';
 }
 // /////////////////////////////////////
 //         L O C O M O T O R
@@ -193,7 +193,7 @@ string Locomotor::part_to_string() {
 }
 string Locomotor::export_part() {
   string output = RobotPart::export_data();
-  return output+'\n'+dtos(max_power,2)+'\n'+dtos(max_speed,2)+'\n';
+  return output+'|'+dtos(max_power,2)+'|'+dtos(max_speed,2)+'|';
 }
 // /////////////////////////////////////
 //            T O R S O
@@ -218,7 +218,7 @@ string Torso::part_to_string() {
 }
 string Torso::export_part() {
   string output = RobotPart::export_data();
-  return output+'\n'+std::to_string(battery_compartments)+'\n'+std::to_string(max_arms)+'\n';
+  return output+'|'+std::to_string(battery_compartments)+'|'+std::to_string(max_arms)+'|';
 }
 // /////////////////////////////////////
 //         R O B O T   M O D E L
@@ -242,7 +242,7 @@ class RobotModel {
     double battery_life();
     string to_string();
     string basic_to_string();
-    string export_data();
+    friend ofstream& operator<<(ofstream& ofs, const RobotModel model);
   private:
     string name;
     int model_number;
@@ -325,18 +325,19 @@ string RobotModel::basic_to_string() {
   output += dtos(battery_life(), 2)+"[h]\n\n";
   return output;
 }
-string RobotModel::export_data() {
-  string output = name+'\n'+std::to_string(model_number)+'\n';
-  output += torso->getModelNumber()+'\n'+head->getModelNumber()+'\n'+locomotor->getModelNumber()+'\n';
-  output += std::to_string(num_of_arms)+'\n';
-  for(int i = 0; i < num_of_arms; i++) {
-    output += arms[i]->getModelNumber()+'\n';
+ofstream& operator<<(ofstream& ofs, const RobotModel model) {
+  string output = model.name+'|'+std::to_string(model.model_number)+'|';
+  output += model.torso->getModelNumber()+'|'+model.head->getModelNumber()+'|'+model.locomotor->getModelNumber()+'|';
+  output += std::to_string(model.num_of_arms)+'|';
+  for(int i = 0; i < model.num_of_arms; i++) {
+    output += model.arms[i]->getModelNumber()+'|';
   }
-  output += std::to_string(num_of_batteries)+'\n';
-  for(int i = 0; i < num_of_batteries; i++) {
-    output += batteries[i]->getModelNumber();
+  output += std::to_string(model.num_of_batteries)+'|';
+  for(int i = 0; i < model.num_of_batteries; i++) {
+    output += model.batteries[i]->getModelNumber()+'|';
   }
-  return output+'\n';
+  ofs << output;
+  return ofs;
 }
 // /////////////////////////////////////
 //    B E L O V E D   C U S T O M E R
@@ -365,7 +366,7 @@ string Customer::to_string() {
   return output;
 }
 ofstream& operator<<(ofstream& ofs, const Customer customer) {
-  ofs << customer.name+'\n'+std::to_string(customer.customer_number)+'\n'+customer.phone_number+'\n'+customer.email_address+'\n';
+  ofs << customer.name+'|'+std::to_string(customer.customer_number)+'|'+customer.phone_number+'|'+customer.email_address+'|';
   return ofs;
 }
 // /////////////////////////////////////
@@ -390,7 +391,7 @@ string SalesAssociate::to_string() {
   return output;
 }
 ofstream& operator<<(ofstream& ofs, const SalesAssociate salesAssociate) {
-  ofs << salesAssociate.name+'\n'+std::to_string(salesAssociate.employee_number)+'\n';
+  ofs << salesAssociate.name+'|'+std::to_string(salesAssociate.employee_number)+'|';
   return ofs;
 }
 // /////////////////////////////////////
@@ -422,10 +423,10 @@ string Order::to_string() {
   return output;
 }
 string Order::export_data() {
-  string output = std::to_string(order_number)+'\n'+date+'\n';
-  output += std::to_string(customer.getCustomerNumber())+'\n'+std::to_string(salesAssociate.getEmployeeNumber())+'\n';
-  output += robotModel.getModelNumber()+'\n'+std::to_string(status);
-  return output+'\n';
+  string output = std::to_string(order_number)+'|'+date+'|';
+  output += std::to_string(customer.getCustomerNumber())+'|'+std::to_string(salesAssociate.getEmployeeNumber())+'|';
+  output += robotModel.getModelNumber()+'|'+std::to_string(status)+'|';
+  return output;
 }
 // /////////////////////////////////////
 //              S H O P
@@ -899,50 +900,74 @@ void Shop::easter_egg() {
   associate = SalesAssociate{"David Williams", 4562};
   salesassociates.push_back(associate);
 
-  order = Order{999, "January 2. 1997", customer, associate, model, 1};
+  order = Order{999, "January 2, 1997", customer, associate, model, 1};
   orders.push_back(order);
 }
 
 void Shop::save(string filename) {
-  ofstream file;
-  file.open(filename);
-  file << std::to_string(robotparts.size()) << '\n';
-  for(int i = 0; i < robotparts.size(); i++) {
-    file << robotparts[i]->export_part();
+  ofstream file (filename);
+  if(file.is_open()) {
+    //RobotPart vector
+    file << std::to_string(robotparts.size()) << '\n';
+    for(int i = 0; i < robotparts.size(); i++) {
+      file << robotparts[i]->export_part();
+    }
+    file << '\n';
+    //RobotModel vector
+    file << std::to_string(robotmodels.size()) << '\n';
+    for(int i = 0; i < robotmodels.size(); i++) {
+      file << robotmodels[i];
+    }
+    file << '\n';
+    //Customer vector
+    file << std::to_string(customers.size()) << '\n';
+    for(int i = 0; i < customers.size(); i++) {
+      file << customers[i];
+    }
+    file << '\n';
+    //SalesAssociate vector
+    file << std::to_string(salesassociates.size()) << '\n';
+    for(int i = 0; i < salesassociates.size(); i++) {
+      file << salesassociates[i];
+    }
+    file << '\n';
+    //Order vector
+    file << std::to_string(orders.size()) << '\n';
+    for(int i = 0; i < orders.size(); i++) {
+      file << orders[i].export_data();
+    }
   }
-  file << std::to_string(robotmodels.size()) << '\n';
-  for(int i = 0; i < robotmodels.size(); i++) {
-    file << robotmodels[i].export_data();
-  }
-  file << std::to_string(customers.size()) << '\n';
-  for(int i = 0; i < customers.size(); i++) {
-    file << customers[i];
-  }
-  file << std::to_string(salesassociates.size()) << '\n';
-  for(int i = 0; i < salesassociates.size(); i++) {
-    file << salesassociates[i];
-  }
-  file << std::to_string(orders.size()) << '\n';
-  for(int i = 0; i < orders.size(); i++) {
-    file << orders[i].export_data();
-  }
+  else
+    cout << "Unable to open file\n";
   file.close();
+  return;
 }
 void Shop::open(string filename) {
-  ifstream file(filename);
-  if(!file) {
-    cout << "An error occurred.\n";
-  } else {
-    cout << "File was successfully opened.\n";
-  }
-  string input;
+  string line;
   int listCount;
+  //Variables to be used while resolving shop data
+  vector<RobotPart*> arms;
+  vector<RobotPart*> batteries;
+  RobotPart* torso, head, locomotor;
+  Customer customer;
+  SalesAssociate salesAssociate;
+  RobotModel robotModel;
+  string type, name, description, image_filename, phone_number, email_address, date;
+  double cost, weight, power_available, max_energy, power, max_power, max_speed;
+  int battery_compartments, max_arms, num_of_arms, num_of_batteries, part_id;
+  int model_number, employee_number, order_number, status, customer_number;
+  int customer_id, associate_id, model_id;
+
+  ifstream file (filename);
+  if(file.is_open()){
+
+  } else {
+    cout << "fucked\n";
+    return;
+  }
+  //Resolving RobotPart list data to vector elements
   file >> listCount;
   file.ignore();
-  //Resolving RobotPart list data to vector elements
-  string type, name, description, image_filename;
-  int model_number;
-  double cost, weight;
   for(int i = 0; i < listCount; i++) {
     file >> type;
     file.ignore();
@@ -957,31 +982,26 @@ void Shop::open(string filename) {
     file >> image_filename;
     file.ignore();
     if(type == "Arm") {
-      double max_power;
       file >> max_power;
       file.ignore();
       robotparts.push_back(new Arm{type, name, model_number, cost, weight, description, image_filename, max_power});
     } else if(type == "Battery") {
-      double power_available, max_energy;
       file >> power_available;
       file.ignore();
       file >> max_energy;
       file.ignore();
       robotparts.push_back(new Battery{type, name, model_number, cost, weight, description, image_filename, power_available, max_energy});
     } else if(type == "Head") {
-      double power;
       file >> power;
       file.ignore();
       robotparts.push_back(new Head{type, name, model_number, cost, weight, description, image_filename, power});
     } else if(type == "Locomotor") {
-      double max_power, max_speed;
       file >> max_power;
       file.ignore();
       file >> max_speed;
       file.ignore();
       robotparts.push_back(new Locomotor{type, name, model_number, cost, weight, description, image_filename, max_power, max_speed});
     } else if(type == "Torso") {
-      int battery_compartments, max_arms;
       file >> battery_compartments;
       file.ignore();
       file >> max_arms;
@@ -990,14 +1010,8 @@ void Shop::open(string filename) {
     }
   }
   //Resolving RobotModel list data to vector elements
-  int num_of_arms, num_of_batteries;
-  int part_id;
-  RobotPart* torso;
-  RobotPart* head;
-  RobotPart* locomotor;
-  vector<RobotPart*> arms;
-  vector<RobotPart*> batteries;
   file >> listCount;
+  file.ignore();
   for(int i = 0; i < listCount; i++) {
     getline(file, name);
     file >> model_number;
@@ -1026,8 +1040,6 @@ void Shop::open(string filename) {
     robotmodels.push_back(RobotModel{name, model_number, torso, head, locomotor, arms, batteries, num_of_batteries, num_of_arms});
   }
   //Resolving Customer list data to vector elements
-  int customer_number;
-  string phone_number, email_address;
   file >> listCount;
   file.ignore();
   for(int i = 0; i < listCount; i++) {
@@ -1039,7 +1051,6 @@ void Shop::open(string filename) {
     customers.push_back(Customer{name, customer_number, phone_number, email_address});
   }
   //Resolving SalesAssociate list data to vector elements
-  int employee_number;
   file >> listCount;
   file.ignore();
   for(int i = 0; i < listCount; i++) {
@@ -1049,12 +1060,6 @@ void Shop::open(string filename) {
     salesassociates.push_back(SalesAssociate{name, employee_number});
   }
   //Resolving Order list data to vector elements
-  int order_number, status;
-  string date;
-  int customer_id, associate_id, model_id;
-  Customer customer;
-  SalesAssociate salesAssociate;
-  RobotModel robotModel;
   file >> listCount;
   file.ignore();
   for(int i = 0; i < listCount; i++) {
@@ -1092,8 +1097,9 @@ int Shop::find_customer(int customer_id) {
 
   for(int i = 0; i < customers.size(); i++) {
     customer_number = customers[i].getCustomerNumber();
-    if(customer_number == customer_id)
+    if(customer_number == customer_id) {
       return i;
+    }
   }
   return 0;
 }
@@ -1112,8 +1118,9 @@ int Shop::find_robot_model(int model_id) {
 
   for(int i = 0; i < robotmodels.size(); i++) {
     model_number = stoi(robotmodels[i].getModelNumber());
-    if(model_number == model_id)
+    if(model_number == model_id){
       return i;
+    }
   }
   return 0;
 }

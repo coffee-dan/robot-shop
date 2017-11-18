@@ -13,5 +13,5 @@ test: test.cpp
 	$(CXX) $(CXXFLAGS) -o test test.cpp
 	./test
 clean: FORCE
-	-rm -f shop.txt *.o hw9 test
+	-rm -f shop.txt *.o hw10 test
 FORCE:

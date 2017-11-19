@@ -585,6 +585,8 @@ istringstream& operator>>(istringstream& is, RobotModel& model) {
   for(char c; is.get(c);) {
     if(c == '|') {
       delcount++;
+      if(delcount > 2 && delcount != 6 && delcount != 8)
+        is.putback(c);
     } else if(delcount == 1 && (isalnum(c) || ispunct(c) || c == ' ')) {
       _name += c;
     } else if(delcount == 2 && isalnum(c)) {
@@ -768,11 +770,13 @@ istringstream& operator>>(istringstream& is, Order& order) {
   Customer customer;
   SalesAssociate salesAssociate;
   RobotModel robotModel;
-  int delcount;
+  int delcount = 0;
   for(char c; is.get(c);) {
     if(c == '|') {
       delcount++;
-    } else if(delcount == 2 && isalnum(c)) {
+      if(delcount > 2)
+        is.putback(c);
+    } else if(delcount == 1 && isalnum(c)) {
       _order_number += c;
     } else if(delcount == 2 && (isalnum(c) || ispunct(c) || c == ' ')) {
       _date += c;
@@ -783,7 +787,8 @@ istringstream& operator>>(istringstream& is, Order& order) {
     } else if(delcount == 5) {
       is >> robotModel;
     } else if(delcount == 6 && isalnum(c)) {
-      _status += c;
+      _status += '9';
+      //_status += c;
     } else if(delcount > 6) {
       is.putback(c);
     }
@@ -795,7 +800,7 @@ istringstream& operator>>(istringstream& is, Order& order) {
   order.customer = customer;
   order.salesAssociate = salesAssociate;
   order.robotModel = robotModel;
-  order.status = stoi(_status);
+  order.status = stoi("1");
 }
 // /////////////////////////////////////
 //              S H O P
@@ -1502,32 +1507,18 @@ Shop shop;
 View view{shop};
 
 // C a l l b a c k s
-void add_mediaCB(Fl_Widget* w, void* p) {
-	string title, leading_actor, director, genre, media_type, age_rating, prompt;
-	int copyright, id;
-
-	title = get_string("Media Title", "Title?");
-	leading_actor = get_string(title, "Leading Actor?");
-	director = get_string(title, "Director?");
-	copyright = stoi(get_string(title, "Copyright date?").c_str());
-	genre = get_string(title, "Genre?");
-	media_type = get_string(title, "Media Type?");
-	age_rating = get_string(title, "Age Rating?");
-	id = stoi(get_string(title, "ID?").c_str());
-
-	//vs.add_media(Media(title, leading_actor, director, copyright, genre, age_rating, media_type, id));
-	fl_message_title("Success!");
-	fl_message_icon()->label("+");
-	fl_message("Media succesfully added!");
+void openCB(Fl_Widget* w, void* p) {
+  display_message("Load", "Importing data...");
+  shop.open("shop.txt");
 }
-
 void saveCB(Fl_Widget* w, void* p) {
   display_message("Save", "Exporting data...");
   shop.save("shop.txt");
 }
-void openCB(Fl_Widget* w, void* p) {
-  display_message("Load", "Importing data...");
-  shop.open("shop.txt");
+void save_asCB(Fl_Widget* w, void* p) {
+  string filename = get_string("Save As", "Enter a filename.");
+  display_message("Save As", "Exporting data to "+filename);
+  shop.save(filename);
 }
 void exitCB(Fl_Widget* w, void* p) {
   display_message("Goodbye!", "Exitting program...");
@@ -1589,13 +1580,13 @@ void eggCB(Fl_Widget* w, void* p) {
 	shop.easter_egg();
 }
 
-
 // M e n u
 Fl_Menu_Item menuitems[] = {
   { "&File", 0, 0, 0, FL_SUBMENU },
-    { "&Save", FL_ALT + 's', (Fl_Callback *)saveCB },
     { "&Open", FL_ALT + 'p', (Fl_Callback *)openCB },
-    { "&Exit", FL_ALT + 'p', (Fl_Callback *)exitCB },
+    { "&Save", FL_ALT + 's', (Fl_Callback *)saveCB },
+    { "&Save As", 0, (Fl_Callback *)save_asCB },
+    { "&Exit", FL_ALT + 'x', (Fl_Callback *)exitCB },
     { 0 },
   { "&Create", 0, 0, 0, FL_SUBMENU },
     { "&Order", FL_ALT + 'o', (Fl_Callback *)new_orderCB },
@@ -1614,7 +1605,7 @@ Fl_Menu_Item menuitems[] = {
     { "&Order", 0, (Fl_Callback *)list_ordersCB },
     { "&Customer", 0, (Fl_Callback *)list_customersCB },
     { "&Sales Associate", 0, (Fl_Callback *)list_associatesCB },
-    { "&Part", FL_ALT + 'p', (Fl_Callback *)list_partsCB },
+    { "&Part", FL_ALT + 0, (Fl_Callback *)list_partsCB },
     { "&Robot Model", 0, (Fl_Callback *)list_modelsCB },
     { 0 },
   { "&Utility", 0, 0, 0, FL_SUBMENU },
@@ -1625,13 +1616,14 @@ Fl_Menu_Item menuitems[] = {
 };
 
 int main() {
+  fl_message_hotspot(0);
   const int X = 640;
 	const int Y = 480;
-	fl_register_images();
 	win = new Fl_Window{X, Y, "Robo Boi"};
+  win->begin();
 
-  menubar = new Fl_Menu_Bar(0, 0, X, 30);
-  menubar->menu(menuitems);
+    menubar = new Fl_Menu_Bar(0, 0, X, 30);
+    menubar->menu(menuitems);
 
   win->end();
   win->show();

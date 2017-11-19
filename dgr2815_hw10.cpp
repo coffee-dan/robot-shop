@@ -80,8 +80,7 @@ class RobotPart {
 
     string to_string();
     virtual string part_to_string()=0;
-    string export_data();
-    virtual string export_part()=0;
+    string export_data() const;
   protected:
     string type;
     string name;
@@ -96,7 +95,7 @@ string RobotPart::to_string() {
   output += "\nDescription : "+description+"\nWeight : "+dtos(weight, 2)+" [lbs]\n";
   return output;
 }
-string RobotPart::export_data() {
+string RobotPart::export_data() const{
   return type+'|'+name+'|'+std::to_string(model_number)+'|'+dtos(cost,2)+'|'+dtos(weight,2)+'|'+description+'|'+image_filename;
 }
 // /////////////////////////////////////
@@ -110,8 +109,8 @@ class Arm : public RobotPart {
      : RobotPart(), max_power() { }
     double getMaxPower() { return max_power; }
     string part_to_string();
-    string export_part();
-    friend istringstream& operator>>(istringstream& is, const Arm* arm);
+    friend ofstream& operator<<(ofstream& ofs, const Arm arm);
+    friend istringstream& operator>>(istringstream& is, Arm& arm);
   private:
     double max_power;
 };
@@ -119,11 +118,11 @@ string Arm::part_to_string() {
   string output = RobotPart::to_string();
   return type+" : "+output+"Max Power : "+dtos(max_power, 2)+" [W]\n\n";
 }
-string Arm::export_part() {
-  string output = RobotPart::export_data();
-  return 'a'+output+'|'+dtos(max_power,2)+'\n';
+ofstream& operator<<(ofstream& ofs, const Arm arm) {
+  ofs << "a|"+arm.export_data()+'|'+dtos(arm.max_power,2);
+  return ofs;
 }
-istringstream& operator>>(istringstream& is, const Arm* arm) {
+istringstream& operator>>(istringstream& is, Arm& arm) {
   string _type, _name, _model_number, _cost, _weight, _description, _image_filename, _max_power;
   _type = "Arm";
   int delcount;
@@ -145,14 +144,15 @@ istringstream& operator>>(istringstream& is, const Arm* arm) {
     } else if(ispunct(c) & isalnum(c) & delcount == 7) {
       _max_power += c;
     }
-  arm->type = _type;
-  arm->name = _name;
-  arm->model_number = atoi(_model_number.c_str());
-  arm->cost = atof(_cost.c_str());
-  arm->weight = atof(_weight.c_str());
-  arm->description = _description;
-  arm->max_power = atof(_max_power.c_str());
-  arm->image_filename = _image_filename;
+  }
+  arm.type = _type;
+  arm.name = _name;
+  arm.model_number = stoi(_model_number);
+  arm.cost = stod(_cost);
+  arm.weight = stod(_weight);
+  arm.description = _description;
+  arm.max_power = stod(_max_power);
+  arm.image_filename = _image_filename;
 }
 // /////////////////////////////////////
 //          B A T T E R Y
@@ -166,8 +166,8 @@ class Battery : public RobotPart {
     double getPowerAvailable() { return power_available; }
     double getMaxEnergy() { return max_energy; }
     string part_to_string();
-    string export_part();
-    friend istringstream& operator>>(istringstream& is, const Battery* battery);
+    friend ofstream& operator<<(ofstream& ofs, const Battery battery);
+    friend istringstream& operator>>(istringstream& is, Battery& battery);
   private:
     double power_available;
     double max_energy;
@@ -176,11 +176,11 @@ string Battery::part_to_string() {
   string output = RobotPart::to_string();
   return type+" : "+output +"Power Available : "+dtos(power_available, 2)+" [W], Max Energy : "+dtos(max_energy, 2)+" [kWh]\n\n";
 }
-string Battery::export_part() {
-  string output = RobotPart::export_data();
-  return 'b'+output+'|'+dtos(power_available,2)+'|'+dtos(max_energy,2)+'\n';
+ofstream& operator<<(ofstream& ofs, const Battery battery) {
+  ofs << "b|"+battery.export_data()+'|'+dtos(battery.power_available,2)+'|'+dtos(battery.max_energy,2);
+  return ofs;
 }
-istringstream& operator>>(istringstream& is, const Battery* battery) {
+istringstream& operator>>(istringstream& is, Battery& battery) {
   string _type, _name, _model_number, _cost, _weight, _description, _image_filename, _power_available, _max_energy;
   _type = "Battery";
   int delcount;
@@ -203,15 +203,15 @@ istringstream& operator>>(istringstream& is, const Battery* battery) {
       _max_energy += c;
     }
   }
-  battery->type = _type;
-  battery->name = _name;
-  battery->model_number = atoi(_model_number.c_str());
-  battery->cost = atof(_cost.c_str());
-  battery->weight = atof(_weight.c_str());
-  battery->description = _description;
-  battery->power_available = atof(_power_available.c_str());
-  battery->max_energy = atof(_max_energy.c_str());
-  battery->image_filename = _image_filename;
+  battery.type = _type;
+  battery.name = _name;
+  battery.model_number = atoi(_model_number.c_str());
+  battery.cost = atof(_cost.c_str());
+  battery.weight = atof(_weight.c_str());
+  battery.description = _description;
+  battery.image_filename = _image_filename;
+  battery.power_available = atof(_power_available.c_str());
+  battery.max_energy = atof(_max_energy.c_str());
 }
 // /////////////////////////////////////
 //             H E A D
@@ -224,8 +224,8 @@ class Head : public RobotPart {
      : RobotPart(), power() { }
     double getPower() { return power; }
     string part_to_string();
-    string export_part();
-    friend istringstream& operator>>(istringstream& is, const Head* head);
+    friend ofstream& operator<<(ofstream& ofs, const Head head);
+    friend istringstream& operator>>(istringstream& is, Head& head);
   private:
     double power;
 };
@@ -233,11 +233,11 @@ string Head::part_to_string() {
   string output = RobotPart::to_string();
   return type+" : "+output +"Power : "+dtos(power, 2)+" [W]\n\n";
 }
-string Head::export_part() {
-  string output = RobotPart::export_data();
-  return 'h'+output+'|'+dtos(power,2)+'\n';
+ofstream& operator<<(ofstream& ofs, const Head head) {
+  ofs << "h|"+head.export_data()+'|'+dtos(head.power,2);
+  return ofs;
 }
-istringstream& operator>>(istringstream& is, const Head* head) {
+istringstream& operator>>(istringstream& is, Head& head) {
   string _type, _name, _model_number, _cost, _weight, _description, _image_filename, _power;
   _type = "Head";
   int delcount;
@@ -260,14 +260,14 @@ istringstream& operator>>(istringstream& is, const Head* head) {
       _power += c;
     }
   }
-  head->type = _type;
-  head->name = _name;
-  head->model_number = atoi(_model_number.c_str());
-  head->cost = atof(_cost.c_str());
-  head->weight = atof(_weight.c_str());
-  head->description = _description;
-  head->power = atof(_power.c_str());
-  head->image_filename = _image_filename;
+  head.type = _type;
+  head.name = _name;
+  head.model_number = stoi(_model_number);
+  head.cost = stod(_cost);
+  head.weight = stod(_weight);
+  head.description = _description;
+  head.image_filename = _image_filename;
+  head.power = stod(_power);
 }
 // /////////////////////////////////////
 //         L O C O M O T O R
@@ -281,8 +281,8 @@ class Locomotor : public RobotPart {
     double getMaxPower() { return max_power; }
     double getMaxSpeed() { return max_speed; }
     string part_to_string();
-    string export_part();
-    friend istringstream& operator>>(istringstream& is, const Locomotor* locomotor);
+    friend ofstream& operator<<(ofstream& ofs, const Locomotor locomotor);
+    friend istringstream& operator>>(istringstream& is, Locomotor& locomotor);
   private:
     double max_power;
     double max_speed;
@@ -291,11 +291,11 @@ string Locomotor::part_to_string() {
   string output = RobotPart::to_string();
   return type+" : "+output +"Max Power : "+dtos(max_power, 2)+" [W], Max Speed : "+dtos(max_speed, 2)+" [mph]\n\n";
 }
-string Locomotor::export_part() {
-  string output = RobotPart::export_data();
-  return 'l'+output+'|'+dtos(max_power,2)+'|'+dtos(max_speed,2)+'\n';
+ofstream& operator<<(ofstream& ofs, const Locomotor locomotor) {
+  ofs << "l|"+locomotor.export_data()+'|'+dtos(locomotor.max_power,2)+'|'+dtos(locomotor.max_speed,2);
+  return ofs;
 }
-istringstream& operator>>(istringstream& is, const Locomotor* locomotor) {
+istringstream& operator>>(istringstream& is, Locomotor& locomotor) {
   string _type, _name, _model_number, _cost, _weight, _description, _image_filename, _max_power, _max_speed;
   _type = "Locomotor";
   int delcount;
@@ -320,6 +320,15 @@ istringstream& operator>>(istringstream& is, const Locomotor* locomotor) {
       _max_speed += c;
     }
   }
+  locomotor.type = _type;
+  locomotor.name = _name;
+  locomotor.model_number = stoi(_model_number);
+  locomotor.cost = stod(_cost);
+  locomotor.weight = stod(_weight);
+  locomotor.description = _description;
+  locomotor.image_filename = _image_filename;
+  locomotor.max_power = stod(_max_power);
+  locomotor.max_speed = stod(_max_speed);
 }
 // /////////////////////////////////////
 //            T O R S O
@@ -334,6 +343,8 @@ class Torso : public RobotPart {
     int getMaxArms() { return max_arms; }
     string part_to_string();
     string export_part();
+    friend ofstream& operator<<(ofstream& ofs, const Torso torso);
+    friend istringstream& operator>>(istringstream& is, Torso& torso);
   private:
     int battery_compartments;
     int max_arms;
@@ -342,9 +353,44 @@ string Torso::part_to_string() {
   string output = RobotPart::to_string();
   return type+" : "+output +"Battery Compartments : "+std::to_string(battery_compartments)+", Max Arms : "+std::to_string(max_arms)+"\n\n";
 }
-string Torso::export_part() {
-  string output = RobotPart::export_data();
-  return 't'+output+'|'+std::to_string(battery_compartments)+'|'+std::to_string(max_arms)+'\n';
+ofstream& operator<<(ofstream& ofs, const Torso torso) {
+  ofs << "t|"+torso.export_data()+'|'+to_string(torso.battery_compartments)+'|'+to_string(torso.max_arms);
+  return ofs;
+}
+istringstream& operator>>(istringstream& is, Torso& torso) {
+  string _type, _name, _model_number, _cost, _weight, _description, _image_filename, _battery_compartments, _max_arms;
+  _type = "Torso";
+  int delcount;
+  for(char c; is.get(c);) {
+    if(c == '|') {
+      delcount++;
+    } else if(isalnum(c) & delcount == 1) {
+      _name += c;
+    } else if(isalnum(c) & delcount == 2) {
+      _model_number += c;
+    } else if(ispunct(c) & isalnum(c) & delcount == 3) {
+      _cost += c;
+    } else if(ispunct(c) & isalnum(c) & delcount == 4) {
+      _weight += c;
+    } else if(ispunct(c) & isalnum(c) & delcount == 5) {
+      _description += c;
+    } else if(ispunct(c) & isalnum(c) & delcount == 6) {
+      _image_filename += c;
+    } else if(isalnum(c) & delcount == 7) {
+      _battery_compartments += c;
+    } else if(isalnum(c) & delcount == 8) {
+      _max_arms += c;
+    }
+  }
+  torso.type = _type;
+  torso.name = _name;
+  torso.model_number = stoi(_model_number);
+  torso.cost = stod(_cost);
+  torso.weight = stod(_weight);
+  torso.description = _description;
+  torso.image_filename = _image_filename;
+  torso.battery_compartments = stoi(_battery_compartments);
+  torso.max_arms = stoi(_max_arms);
 }
 // /////////////////////////////////////
 //         R O B O T   M O D E L
@@ -369,6 +415,7 @@ class RobotModel {
     string to_string();
     string basic_to_string();
     friend ofstream& operator<<(ofstream& ofs, const RobotModel model);
+    friend istringstream& operator>>(istringstream& is, RobotModel& model);
   private:
     string name;
     int model_number;
@@ -452,18 +499,25 @@ string RobotModel::basic_to_string() {
   return output;
 }
 ofstream& operator<<(ofstream& ofs, const RobotModel model) {
-  string output = 'r'+model.name+'|'+std::to_string(model.model_number)+'|';
-  output += model.torso->getModelNumber()+'|'+model.head->getModelNumber()+'|'+model.locomotor->getModelNumber()+'|';
-  output += std::to_string(model.num_of_arms)+'|';
+  ofs << "r|"+model.name+'|'+to_string(model.model_number)+'|';
+
+  ofs << model.torso->getModelNumber() << '|';
+  ofs << model.head->getModelNumber() << '|';
+  ofs << model.locomotor->getModelNumber() << '|';
+
+  ofs << model.num_of_arms << '|';
   for(int i = 0; i < model.num_of_arms; i++) {
-    output += model.arms[i]->getModelNumber()+'|';
+    ofs << model.arms[i] << '|';
   }
-  output += std::to_string(model.num_of_batteries)+'|';
+  ofs << model.num_of_batteries << '|';
   for(int i = 0; i < model.num_of_batteries; i++) {
-    output += model.batteries[i]->getModelNumber()+'|';
+    ofs << model.batteries[i] << '|';
   }
-  ofs << output+'\n';
+
   return ofs;
+}
+istringstream& operator>>(istringstream& is, RobotModel& model) {
+
 }
 // /////////////////////////////////////
 //    B E L O V E D   C U S T O M E R
@@ -480,6 +534,7 @@ class Customer {
     string getEmailAddress() { return email_address; }
     string to_string();
     friend ofstream& operator<<(ofstream& ofs, const Customer customer);
+    friend istringstream& operator>>(istringstream& is, Customer& customer);
   private:
     string name;
     int customer_number;
@@ -492,8 +547,29 @@ string Customer::to_string() {
   return output;
 }
 ofstream& operator<<(ofstream& ofs, const Customer customer) {
-  ofs << 'c'+customer.name+'|'+std::to_string(customer.customer_number)+'|'+customer.phone_number+'|'+customer.email_address+'\n';
+  ofs << "c|"+customer.name+'|'+to_string(customer.customer_number)+'|'+customer.phone_number+'|'+customer.email_address;
   return ofs;
+}
+istringstream& operator>>(istringstream& is, Customer& customer) {
+  string _name, _customer_number, _phone_number, _email_address;
+  int delcount;
+  for(char c; is.get(c);) {
+    if(c == '|') {
+      delcount++;
+    } else if(isalnum(c) & delcount == 1) {
+      _name += c;
+    } else if(isalnum(c) & delcount == 2) {
+      _customer_number += c;
+    } else if(ispunct(c) & isalnum(c) & delcount == 3) {
+      _phone_number += c;
+    } else if(ispunct(c) & isalnum(c) & delcount == 4) {
+      _email_address += c;
+    }
+  }
+  customer.name = _name;
+  customer.customer_number = stoi(_customer_number);
+  customer.phone_number = _phone_number;
+  customer.email_address = _email_address;
 }
 // /////////////////////////////////////
 //     S A L E S   A S S O C I A T E
@@ -508,6 +584,7 @@ class SalesAssociate {
     int getEmployeeNumber() { return employee_number; }
     string to_string();
     friend ofstream& operator<<(ofstream& ofs, const SalesAssociate salesAssociate);
+    friend istringstream& operator>>(istringstream& is, SalesAssociate& associate);
   private:
     string name;
     int employee_number;
@@ -517,8 +594,23 @@ string SalesAssociate::to_string() {
   return output;
 }
 ofstream& operator<<(ofstream& ofs, const SalesAssociate salesAssociate) {
-  ofs << 's'+salesAssociate.name+'|'+std::to_string(salesAssociate.employee_number)+'\n';
+  ofs << "s|"+salesAssociate.name+'|'+to_string(salesAssociate.employee_number);
   return ofs;
+}
+istringstream& operator>>(istringstream& is, SalesAssociate& associate) {
+  string name, employee_number;
+  int delcount;
+  for(char c; is.get(c);) {
+    if(c == '|') {
+      delcount++;
+    } else if(isalnum(c) & delcount == 1) {
+      name += c;
+    } else if(isalnum(c) & delcount == 2) {
+      employee_number += c;
+    }
+  }
+  associate.name = name;
+  associate.employee_number = stoi(employee_number);
 }
 // /////////////////////////////////////
 //             O R D E R
@@ -530,7 +622,8 @@ class Order {
     Order()
      : order_number(), date(), customer(), salesAssociate(), robotModel(), status() { }
     string to_string();
-    string export_data();
+    friend ofstream& operator<<(ofstream& ofs, const Order order);
+    friend istringstream& operator>>(istringstream& is, Order& order);
   private:
     int order_number;
     string date;
@@ -539,7 +632,6 @@ class Order {
     RobotModel robotModel;
     int status;
 };
-
 string Order::to_string() {
   string output = "Order #"+std::to_string(order_number)+" - "+date+"\n\n";
   output += customer.to_string()+'\n';
@@ -548,11 +640,15 @@ string Order::to_string() {
   output += "Order status: "+std::to_string(status)+'\n';
   return output;
 }
-string Order::export_data() {
-  string output = 'o'+std::to_string(order_number)+'|'+date+'|';
-  output += std::to_string(customer.getCustomerNumber())+'|'+std::to_string(salesAssociate.getEmployeeNumber())+'|';
-  output += robotModel.getModelNumber()+'|'+std::to_string(status)+'\n';
-  return output;
+ofstream& operator<<(ofstream& ofs, const Order order) {
+  ofs << "o|"+to_string(order.order_number)+'|'+order.date+'|';
+  ofs << order.customer << '|';
+  ofs << order.salesAssociate << '|';
+  ofs << order.robotModel << to_string(order.status);
+  return ofs;
+}
+istringstream& operator>>(istringstream& is, Order& order) {
+
 }
 // /////////////////////////////////////
 //              S H O P
@@ -1035,27 +1131,23 @@ void Shop::save(string filename) {
   if(file.is_open()) {
     //RobotPart vector
     for(int i = 0; i < robotparts.size(); i++) {
-      file << robotparts[i]->export_part();
+      file << robotparts[i] << '\n';
     }
-    file << '\n';
     //RobotModel vector
     for(int i = 0; i < robotmodels.size(); i++) {
-      file << robotmodels[i];
+      file << robotmodels[i] << '\n';
     }
-    file << '\n';
     //Customer vector
     for(int i = 0; i < customers.size(); i++) {
-      file << customers[i];
+      file << customers[i] << '\n';
     }
-    file << '\n';
     //SalesAssociate vector
     for(int i = 0; i < salesassociates.size(); i++) {
-      file << salesassociates[i];
+      file << salesassociates[i] << '\n';
     }
-    file << '\n';
     //Order vector
     for(int i = 0; i < orders.size(); i++) {
-      file << orders[i].export_data();
+      file << orders[i] << '\n';
     }
   }
   else
@@ -1064,55 +1156,50 @@ void Shop::save(string filename) {
   return;
 }
 void Shop::open(string filename) {
-  string line;
-  char choice;
   //Variables to be used while resolving shop data
-  vector<RobotPart*> arms;
-  vector<RobotPart*> batteries;
-  RobotPart* torso, head, locomotor;
-  Customer customer;
-  SalesAssociate salesAssociate;
-  RobotModel robotModel;
-  string name, description, image_filename, phone_number, email_address, date;
-  double cost, weight, power_available, max_energy, power, max_power, max_speed;
-  int battery_compartments, max_arms, num_of_arms, num_of_batteries, part_id;
-  int model_number, employee_number, order_number, status, customer_number;
-  int customer_id, associate_id, model_id;
+  string line;
   char type;
-
   ifstream file (filename);
+
+  //Early return if file is unopenable
   if(file.is_open()){
-    cout << "Opening in file...\n";
+    cout << "Opening file...\n";
   } else {
-    cout << "fucked\n";
+    cout << "File is somehow not working...\n";
     return;
   }
+
   while(getline(file, line)) {
     istringstream ss (line);
     type = ss.get();
     //Resolving RobotPart list data to vector elements
     if(type == 'a') {
       Arm* arm;
-      ss >> (arm);
-      robotparts.push_back(new Arm{"Arm", name, model_number, cost, weight, description, image_filename, max_power});
+      ss >> (*arm);
+      robotparts.push_back(arm);
     } else if(type == 'b') {
       Battery* battery;
-      ss >> (battery);
-      robotparts.push_back(new Battery{"Battery", name, model_number, cost, weight, description, image_filename, power_available, max_energy});
+      ss >> (*battery);
+      robotparts.push_back(battery);
     } else if(type == 'h') {
       Head* head;
-      ss >> (head);
-      robotparts.push_back(new Head{"Head", name, model_number, cost, weight, description, image_filename, power});
+      ss >> (*head);
+      robotparts.push_back(head);
     } else if(type == 'l') {
       Locomotor* locomotor;
-      ss >> (locomotor);
-      robotparts.push_back(new Locomotor{"Locomotor", name, model_number, cost, weight, description, image_filename, max_power, max_speed});
+      ss >> (*locomotor);
+      robotparts.push_back(locomotor);
     } else if(type == 't') {
       Torso* torso;
-      ss >> (torso);
-      robotparts.push_back(new Torso{"Torso", name, model_number, cost, weight, description, image_filename, battery_compartments, max_arms});
+      ss >> (*torso);
+      robotparts.push_back(torso);
     }
     //Resolving RobotModel list data to vector elements
+    else if(type == 'r') {
+      RobotModel model;
+      ss >> model;
+      robotmodels.push_back(model);
+    }
     /*
     torso = robotparts[find_part("Torso", part_id)];
     head = robotparts[find_part("Head", part_id)];
@@ -1126,17 +1213,26 @@ void Shop::open(string filename) {
       batteries[i] = robotparts[find_part("Battery", part_id)];
     }
     */
-    file >> line;
-    robotmodels.push_back(RobotModel{name, model_number, torso, head, locomotor, arms, batteries, num_of_batteries, num_of_arms});
+
     //Resolving Customer list data to vector elements
-    customers.push_back(Customer{name, customer_number, phone_number, email_address});
+    else if(type == 'c') {
+      Customer customer;
+      ss >> customer;
+      customers.push_back(customer);
+    }
     //Resolving SalesAssociate list data to vector elements
-    salesassociates.push_back(SalesAssociate{name, employee_number});
+    else if(type == 's') {
+      SalesAssociate associate;
+      ss >> associate;
+      salesassociates.push_back(associate);
+    }
     //Resolving Order list data to vector elements
-    customer = customers[find_customer(customer_id)];
-    salesAssociate = salesassociates[find_sales_associate(associate_id)];
-    robotModel = robotmodels[find_robot_model(model_id)];
-    orders.push_back(Order{order_number, date, customer, salesAssociate, robotModel, status});
+    else if(type == 'o') {
+      Order order;
+      ss >> order;
+      orders.push_back(order);
+    }
+
   }
 }
 int Shop::find_part(string type, int part_id) {

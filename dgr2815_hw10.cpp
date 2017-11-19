@@ -501,17 +501,17 @@ string RobotModel::basic_to_string() {
 ofstream& operator<<(ofstream& ofs, const RobotModel model) {
   ofs << "r|"+model.name+'|'+to_string(model.model_number)+'|';
 
-  ofs << model.torso->getModelNumber() << '|';
-  ofs << model.head->getModelNumber() << '|';
-  ofs << model.locomotor->getModelNumber() << '|';
+  ofs << *static_cast<Torso*>(model.torso) << '|';
+  ofs << *static_cast<Head*>(model.head) << '|';
+  ofs << *static_cast<Locomotor*>(model.locomotor) << '|';
 
   ofs << model.num_of_arms << '|';
   for(int i = 0; i < model.num_of_arms; i++) {
-    ofs << model.arms[i] << '|';
+    ofs << *static_cast<Arm*>(model.arms[i]) << '|';
   }
   ofs << model.num_of_batteries << '|';
   for(int i = 0; i < model.num_of_batteries; i++) {
-    ofs << model.batteries[i] << '|';
+    ofs << *static_cast<Battery*>(model.batteries[i]) << '|';
   }
 
   return ofs;
@@ -1130,8 +1130,20 @@ void Shop::save(string filename) {
   ofstream file (filename);
   if(file.is_open()) {
     //RobotPart vector
+    string type;
     for(int i = 0; i < robotparts.size(); i++) {
-      file << robotparts[i] << '\n';
+      type = robotparts[i]->getType();
+        if(type == "Arm") {
+          file << *static_cast<Arm*>(robotparts[i]) << '\n';
+        } else if(type == "Battery") {
+          file << *static_cast<Battery*>(robotparts[i]) << '\n';
+        } else if(type == "Head") {
+          file << *static_cast<Head*>(robotparts[i]) << '\n';
+        } else if(type == "Locomotor") {
+          file << *static_cast<Locomotor*>(robotparts[i]) << '\n';
+        } else if(type == "Torso") {
+          file << *static_cast<Torso*>(robotparts[i]) << '\n';
+        }
     }
     //RobotModel vector
     for(int i = 0; i < robotmodels.size(); i++) {

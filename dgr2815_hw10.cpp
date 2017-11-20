@@ -177,8 +177,6 @@ istringstream& operator>>(istringstream& is, Arm& arm) {
       _image_filename += c;
     } else if(delcount == 7 && (isdigit(c) || c == '.')) {
       _max_power += c;
-    } else if(delcount > 8) {
-      is.putback(c);
     }
 
     if(delcount > 8) break;
@@ -241,8 +239,6 @@ istringstream& operator>>(istringstream& is, Battery& battery) {
       _power_available += c;
     } else if(delcount == 8 && (isdigit(c) || c == '.')) {
       _max_energy += c;
-    } else if(delcount > 8) {
-      is.putback(c);
     }
 
     if(delcount > 8) break;
@@ -302,8 +298,6 @@ istringstream& operator>>(istringstream& is, Head& head) {
       _image_filename += c;
     } else if(delcount == 7 && (isdigit(c) || c == '.')) {
       _power += c;
-    } else if(delcount > 7) {
-      is.putback(c);
     }
 
     if(delcount > 7) break;
@@ -366,8 +360,6 @@ istringstream& operator>>(istringstream& is, Locomotor& locomotor) {
       _max_power += c;
     } else if(delcount == 8 && (isdigit(c) || c == '.')) {
       _max_speed += c;
-    } else if(delcount > 8) {
-      is.putback(c);
     }
 
     if(delcount > 8) break;
@@ -432,8 +424,6 @@ istringstream& operator>>(istringstream& is, Torso& torso) {
       _battery_compartments += c;
     } else if(delcount == 8 && isdigit(c)) {
       _max_arms += c;
-    } else if(delcount > 8) {
-      is.putback(c);
     }
 
     if(delcount > 8) break;

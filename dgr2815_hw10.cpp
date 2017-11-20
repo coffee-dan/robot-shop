@@ -1605,7 +1605,7 @@ Fl_Menu_Item menuitems[] = {
     { "&Order", 0, (Fl_Callback *)list_ordersCB },
     { "&Customer", 0, (Fl_Callback *)list_customersCB },
     { "&Sales Associate", 0, (Fl_Callback *)list_associatesCB },
-    { "&Part", FL_ALT + 0, (Fl_Callback *)list_partsCB },
+    { "&Part", 0, (Fl_Callback *)list_partsCB },
     { "&Robot Model", 0, (Fl_Callback *)list_modelsCB },
     { 0 },
   { "&Utility", 0, 0, 0, FL_SUBMENU },

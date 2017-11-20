@@ -75,7 +75,7 @@ int get_int(string title, string prompt, int min_int, int max_int) {
   return result;
 }
 string get_string(string prompt) {
-  string title = "Generic Dialog";
+  string title = "Robot Bois";
   fl_message_title(title.c_str());
   fl_message_icon()->label("?");
   string result{fl_input("%s", 0, prompt.c_str())};
@@ -165,17 +165,17 @@ istringstream& operator>>(istringstream& is, Arm& arm) {
       delcount++;
     } else if(delcount == 1 && (isalnum(c) || ispunct(c) || c == ' ')) {
       _name += c;
-    } else if(delcount == 2 && isalnum(c)) {
+    } else if(delcount == 2 && isdigit(c)) {
       _model_number += c;
-    } else if(delcount == 3 && (isalnum(c) || c == '.')) {
+    } else if(delcount == 3 && (isdigit(c) || c == '.')) {
       _cost += c;
-    } else if(delcount == 4 && (isalnum(c) || c == '.')) {
+    } else if(delcount == 4 && (isdigit(c) || c == '.')) {
       _weight += c;
     } else if(delcount == 5 && (isalnum(c) || ispunct(c) || c == ' ')) {
       _description += c;
     } else if(delcount == 6 && (isalnum(c) || c == '.')) {
       _image_filename += c;
-    } else if(delcount == 7 && (isalnum(c) || c == '.')) {
+    } else if(delcount == 7 && (isdigit(c) || c == '.')) {
       _max_power += c;
     } else if(delcount > 8) {
       is.putback(c);
@@ -227,19 +227,19 @@ istringstream& operator>>(istringstream& is, Battery& battery) {
       delcount++;
     } else if(delcount == 1 && (isalnum(c) || ispunct(c) || c == ' ')) {
       _name += c;
-    } else if(delcount == 2 && isalnum(c)) {
+    } else if(delcount == 2 && isdigit(c)) {
       _model_number += c;
-    } else if(delcount == 3 && (isalnum(c) || c == '.')) {
+    } else if(delcount == 3 && (isdigit(c) || c == '.')) {
       _cost += c;
-    } else if(delcount == 4 && (isalnum(c) || c == '.')) {
+    } else if(delcount == 4 && (isdigit(c) || c == '.')) {
       _weight += c;
     } else if(delcount == 5 && (isalnum(c) || ispunct(c) || c == ' ')) {
       _description += c;
     } else if(delcount == 6 && (isalnum(c) || c == '.')) {
       _image_filename += c;
-    } else if(delcount == 7 && (isalnum(c) || c == '.')) {
+    } else if(delcount == 7 && (isdigit(c) || c == '.')) {
       _power_available += c;
-    } else if(delcount == 8 && (isalnum(c) || c == '.')) {
+    } else if(delcount == 8 && (isdigit(c) || c == '.')) {
       _max_energy += c;
     } else if(delcount > 8) {
       is.putback(c);
@@ -290,17 +290,17 @@ istringstream& operator>>(istringstream& is, Head& head) {
       delcount++;
     } else if(delcount == 1 && (isalnum(c) || ispunct(c) || c == ' ')) {
       _name += c;
-    } else if(delcount == 2 && isalnum(c)) {
+    } else if(delcount == 2 && isdigit(c)) {
       _model_number += c;
-    } else if(delcount == 3 && (isalnum(c) || c == '.')) {
+    } else if(delcount == 3 && (isdigit(c) || c == '.')) {
       _cost += c;
-    } else if(delcount == 4 && (isalnum(c) || c == '.')) {
+    } else if(delcount == 4 && (isdigit(c) || c == '.')) {
       _weight += c;
     } else if(delcount == 5 && (isalnum(c) || ispunct(c) || c == ' ')) {
       _description += c;
     } else if(delcount == 6 && (isalnum(c) || c == '.')) {
       _image_filename += c;
-    } else if(delcount == 7 && (isalnum(c) || c == '.')) {
+    } else if(delcount == 7 && (isdigit(c) || c == '.')) {
       _power += c;
     } else if(delcount > 7) {
       is.putback(c);
@@ -352,19 +352,19 @@ istringstream& operator>>(istringstream& is, Locomotor& locomotor) {
       delcount++;
     } else if(delcount == 1 && (isalnum(c) || ispunct(c) || c == ' ')) {
       _name += c;
-    } else if(delcount == 2 && isalnum(c)) {
+    } else if(delcount == 2 && isdigit(c)) {
       _model_number += c;
-    } else if(delcount == 3 && (isalnum(c) || c == '.')) {
+    } else if(delcount == 3 && (isdigit(c) || c == '.')) {
       _cost += c;
-    } else if(delcount == 4 && (isalnum(c) || c == '.')) {
+    } else if(delcount == 4 && (isdigit(c) || c == '.')) {
       _weight += c;
     } else if(delcount == 5 && (isalnum(c) || ispunct(c) || c == ' ')) {
       _description += c;
     } else if(delcount == 6 && (isalnum(c) || c == '.')) {
       _image_filename += c;
-    } else if(delcount == 7 && (isalnum(c) || c == '.')) {
+    } else if(delcount == 7 && (isdigit(c) || c == '.')) {
       _max_power += c;
-    } else if(delcount == 8 && (isalnum(c) || c == '.')) {
+    } else if(delcount == 8 && (isdigit(c) || c == '.')) {
       _max_speed += c;
     } else if(delcount > 8) {
       is.putback(c);
@@ -418,19 +418,19 @@ istringstream& operator>>(istringstream& is, Torso& torso) {
       delcount++;
     } else if(delcount == 1 && (isalnum(c) || ispunct(c) || c == ' ')) {
       _name += c;
-    } else if(delcount == 2 && isalnum(c)) {
+    } else if(delcount == 2 && isdigit(c)) {
       _model_number += c;
-    } else if(delcount == 3 && (isalnum(c) || c == '.')) {
+    } else if(delcount == 3 && (isdigit(c) || c == '.')) {
       _cost += c;
-    } else if(delcount == 4 && (isalnum(c) || c == '.')) {
+    } else if(delcount == 4 && (isdigit(c) || c == '.')) {
       _weight += c;
     } else if(delcount == 5 && (isalnum(c) || ispunct(c) || c == ' ')) {
       _description += c;
     } else if(delcount == 6 && (isalnum(c) || c == '.')) {
       _image_filename += c;
-    } else if(delcount == 7 && isalnum(c)) {
+    } else if(delcount == 7 && isdigit(c)) {
       _battery_compartments += c;
-    } else if(delcount == 8 && isalnum(c)) {
+    } else if(delcount == 8 && isdigit(c)) {
       _max_arms += c;
     } else if(delcount > 8) {
       is.putback(c);
@@ -589,7 +589,7 @@ istringstream& operator>>(istringstream& is, RobotModel& model) {
         is.putback(c);
     } else if(delcount == 1 && (isalnum(c) || ispunct(c) || c == ' ')) {
       _name += c;
-    } else if(delcount == 2 && isalnum(c)) {
+    } else if(delcount == 2 && isdigit(c)) {
       _model_number += c;
     } else if(delcount == 3) {
       is >> (*torso);
@@ -599,7 +599,7 @@ istringstream& operator>>(istringstream& is, RobotModel& model) {
       is >> (*locomotor);
     }
     //List of arms
-    else if(delcount == 6 && isalnum(c)) {
+    else if(delcount == 6 && isdigit(c)) {
       _num_of_arms += c;
     } else if(delcount == 7) {
       for(int i = 0; i < stoi(_num_of_arms); i++) {
@@ -608,7 +608,7 @@ istringstream& operator>>(istringstream& is, RobotModel& model) {
       }
     }
     //List of batteries
-    else if(delcount == 8 && isalnum(c)) {
+    else if(delcount == 8 && isdigit(c)) {
       _num_of_batteries += c;
     } else if(delcount == 9) {
       for(int i = 0; i < stoi(_num_of_batteries); i++) {
@@ -634,8 +634,7 @@ istringstream& operator>>(istringstream& is, RobotModel& model) {
 // /////////////////////////////////////
 class Customer {
   public:
-    Customer(string _name, int _customer_num, string _phone_num, string _email)
-     : name(_name), customer_number(_customer_num), phone_number(_phone_num), email_address(_email) { }
+    Customer(string _name, int _customer_num, string _phone_num, string _email);
     Customer()
      : name(), customer_number(), phone_number(), email_address() { }
     string getName() { return name; }
@@ -651,6 +650,15 @@ class Customer {
     string phone_number;
     string email_address;
 };
+Customer::Customer(string _name, int _customer_num, string _phone_num, string _email) {
+  name = _name;
+  customer_number = _customer_num;
+  phone_number = _phone_num;
+  email_address = _email;
+  //This is so that fulltick is able to display test.
+  size_t location_of_at = email_address.find_first_of("@");
+  email_address.insert(location_of_at, "@");
+}
 string Customer::to_string() {
   string output = "Customer #"+std::to_string(customer_number)+" - "+name+'\n';
   output += phone_number+", "+email_address+'\n';
@@ -668,17 +676,17 @@ istringstream& operator>>(istringstream& is, Customer& customer) {
       delcount++;
     } else if(delcount == 1 && (isalnum(c) || ispunct(c) || c == ' ')) {
       _name += c;
-    } else if(delcount == 2 && isalnum(c)) {
+    } else if(delcount == 2 && isdigit(c)) {
       _customer_number += c;
-    } else if(delcount == 3 && (isalnum(c) || ispunct(c))) {
+    } else if(delcount == 3 && (isalnum(c) || ispunct(c) || c == '-')) {
       _phone_number += c;
     } else if(delcount == 4 && (isalnum(c) || ispunct(c))) {
       _email_address += c;
-    } else if(delcount > 5) {
+    } else if(delcount > 4) {
       is.putback(c);
     }
 
-    if(delcount > 5) break;
+    if(delcount > 4) break;
   }
   customer.name = _name;
   customer.customer_number = stoi(_customer_number);
@@ -719,13 +727,13 @@ istringstream& operator>>(istringstream& is, SalesAssociate& associate) {
       delcount++;
     } else if(delcount == 1 && (isalnum(c) || ispunct(c) || c == ' ')) {
       name += c;
-    } else if(delcount == 2 && isalnum(c)) {
+    } else if(delcount == 2 && isdigit(c)) {
       employee_number += c;
-    } else if(delcount > 3) {
+    } else if(delcount > 2) {
       is.putback(c);
     }
 
-    if(delcount > 3) break;
+    if(delcount > 2) break;
   }
   associate.name = name;
   associate.employee_number = stoi(employee_number);
@@ -755,7 +763,7 @@ string Order::to_string() {
   output += customer.to_string()+'\n';
   output += salesAssociate.to_string()+'\n';
   output += robotModel.basic_to_string();
-  output += "Order status: "+std::to_string(status)+'\n';
+  output += "Order status: "+std::to_string(status);
   return output;
 }
 ofstream& operator<<(ofstream& ofs, const Order order) {
@@ -774,9 +782,9 @@ istringstream& operator>>(istringstream& is, Order& order) {
   for(char c; is.get(c);) {
     if(c == '|') {
       delcount++;
-      if(delcount > 2)
+      if(delcount > 2 && delcount != 6)
         is.putback(c);
-    } else if(delcount == 1 && isalnum(c)) {
+    } else if(delcount == 1 && isdigit(c)) {
       _order_number += c;
     } else if(delcount == 2 && (isalnum(c) || ispunct(c) || c == ' ')) {
       _date += c;
@@ -786,9 +794,8 @@ istringstream& operator>>(istringstream& is, Order& order) {
       is >> salesAssociate;
     } else if(delcount == 5) {
       is >> robotModel;
-    } else if(delcount == 6 && isalnum(c)) {
-      _status += '9';
-      //_status += c;
+    } else if(delcount == 6 && isdigit(c)) {
+      _status += c;
     } else if(delcount > 6) {
       is.putback(c);
     }
@@ -1115,8 +1122,8 @@ string Shop::order_to_string(int index) {
   return orders[index].to_string();
 }
 string Shop::order_list_to_string() {
-  if(orders.size() == 0) return "No orders on record.\n";
-  string output;
+  if(orders.size() == 0) return "No orders on record.";
+  string output = "";
   for(int i = 0; i < orders.size(); i++) {
     output += order_to_string(i);
   }
@@ -1265,7 +1272,7 @@ void Shop::easter_egg() {
   model = RobotModel{"ACME Robo", 5843, torso, head, locomotor, arms, batteries, 2, 2};
   robotmodels.push_back(model);
 
-  customer = Customer{"John Smith", 2448, "817-555-5555", "me@aol.com"};
+  customer = Customer{"John Smith", 2448, "817-555-5555", "email@aol.com"};
   customers.push_back(customer);
 
   associate = SalesAssociate{"David Williams", 4562};
@@ -1273,6 +1280,7 @@ void Shop::easter_egg() {
 
   order = Order{999, "January 2, 1997", customer, associate, model, 1};
   orders.push_back(order);
+
 }
 
 void Shop::save(string filename) {
@@ -1592,7 +1600,7 @@ Fl_Menu_Item menuitems[] = {
     { "&Order", FL_ALT + 'o', (Fl_Callback *)new_orderCB },
     { "&Customer", FL_ALT + 'c', (Fl_Callback *)new_customerCB },
     { "&Sales Associate", FL_ALT + 's', (Fl_Callback *)new_associateCB },
-    { "&Create", 0, 0, 0, FL_SUBMENU },
+    { "&Part", 0, 0, 0, FL_SUBMENU },
       { "&Arm", FL_ALT + 'a' , (Fl_Callback *)new_armCB },
       { "&Battery", FL_ALT + 'b' , (Fl_Callback *)new_batteryCB },
       { "&Head", FL_ALT + 'h' , (Fl_Callback *)new_headCB },

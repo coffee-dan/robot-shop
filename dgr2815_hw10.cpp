@@ -159,7 +159,7 @@ ofstream& operator<<(ofstream& ofs, const Arm arm) {
 istringstream& operator>>(istringstream& is, Arm& arm) {
   string _type = "Arm";
   string _name, _model_number, _cost, _weight, _description, _image_filename, _max_power;
-  int delcount = 0;
+  int delcount = 1;
   for(char c; is.get(c);) {
     if(c == '|') {
       delcount++;
@@ -221,7 +221,7 @@ ofstream& operator<<(ofstream& ofs, const Battery battery) {
 istringstream& operator>>(istringstream& is, Battery& battery) {
   string _type = "Battery";
   string _name, _model_number, _cost, _weight, _description, _image_filename, _power_available, _max_energy;
-  int delcount = 0;
+  int delcount = 1;
   for(char c; is.get(c);) {
     if(c == '|') {
       delcount++;
@@ -284,7 +284,7 @@ ofstream& operator<<(ofstream& ofs, const Head head) {
 istringstream& operator>>(istringstream& is, Head& head) {
   string _type = "Head";
   string _name, _model_number, _cost, _weight, _description, _image_filename, _power;
-  int delcount = 0;
+  int delcount = 1;
   for(char c; is.get(c);) {
     if(c == '|') {
       delcount++;
@@ -346,7 +346,7 @@ ofstream& operator<<(ofstream& ofs, const Locomotor locomotor) {
 istringstream& operator>>(istringstream& is, Locomotor& locomotor) {
   string _type = "Locomotor";
   string _name, _model_number, _cost, _weight, _description, _image_filename, _max_power, _max_speed;
-  int delcount = 0;
+  int delcount = 1;
   for(char c; is.get(c);) {
     if(c == '|') {
       delcount++;
@@ -412,7 +412,7 @@ ofstream& operator<<(ofstream& ofs, const Torso torso) {
 istringstream& operator>>(istringstream& is, Torso& torso) {
   string _type, _name, _model_number, _cost, _weight, _description, _image_filename, _battery_compartments, _max_arms;
   _type = "Torso";
-  int delcount = 0;
+  int delcount = 1;
   for(char c; is.get(c);) {
     if(c == '|') {
       delcount++;
@@ -581,21 +581,22 @@ istringstream& operator>>(istringstream& is, RobotModel& model) {
   Battery* battery = new Battery{};
   vector<RobotPart*> arms;
   vector<RobotPart*> batteries;
-  int delcount = 0;
+  int delcount = 1;
   for(char c; is.get(c);) {
     if(c == '|') {
       delcount++;
-      if(delcount > 2 && delcount != 6 && delcount != 8)
-        is.putback(c);
     } else if(delcount == 1 && (isalnum(c) || ispunct(c) || c == ' ')) {
       _name += c;
     } else if(delcount == 2 && isdigit(c)) {
       _model_number += c;
     } else if(delcount == 3) {
+      is.putback(c);
       is >> (*torso);
     } else if(delcount == 4) {
+      is.putback(c);
       is >> (*head);
     } else if(delcount == 5) {
+      is.putback(c);
       is >> (*locomotor);
     }
     //List of arms
@@ -670,7 +671,7 @@ ofstream& operator<<(ofstream& ofs, const Customer customer) {
 }
 istringstream& operator>>(istringstream& is, Customer& customer) {
   string _name, _customer_number, _phone_number, _email_address;
-  int delcount = 0;
+  int delcount = 1;
   for(char c; is.get(c);) {
     if(c == '|') {
       delcount++;
@@ -721,7 +722,7 @@ ofstream& operator<<(ofstream& ofs, const SalesAssociate salesAssociate) {
 }
 istringstream& operator>>(istringstream& is, SalesAssociate& associate) {
   string name, employee_number;
-  int delcount = 0;
+  int delcount = 1;
   for(char c; is.get(c);) {
     if(c == '|') {
       delcount++;
@@ -778,21 +779,22 @@ istringstream& operator>>(istringstream& is, Order& order) {
   Customer customer;
   SalesAssociate salesAssociate;
   RobotModel robotModel;
-  int delcount = 0;
+  int delcount = 1;
   for(char c; is.get(c);) {
     if(c == '|') {
       delcount++;
-      if(delcount > 2 && delcount != 6)
-        is.putback(c);
     } else if(delcount == 1 && isdigit(c)) {
       _order_number += c;
     } else if(delcount == 2 && (isalnum(c) || ispunct(c) || c == ' ')) {
       _date += c;
     } else if(delcount == 3) {
+      is.putback(c);
       is >> customer;
     } else if(delcount == 4) {
+      is.putback(c);
       is >> salesAssociate;
     } else if(delcount == 5) {
+      is.putback(c);
       is >> robotModel;
     } else if(delcount == 6 && isdigit(c)) {
       _status += c;
@@ -807,7 +809,7 @@ istringstream& operator>>(istringstream& is, Order& order) {
   order.customer = customer;
   order.salesAssociate = salesAssociate;
   order.robotModel = robotModel;
-  order.status = stoi("1");
+  order.status = stoi(_status);
 }
 // /////////////////////////////////////
 //              S H O P
@@ -1291,40 +1293,40 @@ void Shop::save(string filename) {
     for(int i = 0; i < robotparts.size(); i++) {
       type = robotparts[i]->getType();
         if(type == "Arm") {
-          file << "a|";
+          file << "a";
           file << *static_cast<Arm*>(robotparts[i]) << '\n';
         } else if(type == "Battery") {
-          file << "b|";
+          file << "b";
           file << *static_cast<Battery*>(robotparts[i]) << '\n';
         } else if(type == "Head") {
-          file << "h|";
+          file << "h";
           file << *static_cast<Head*>(robotparts[i]) << '\n';
         } else if(type == "Locomotor") {
-          file << "l|";
+          file << "l";
           file << *static_cast<Locomotor*>(robotparts[i]) << '\n';
         } else if(type == "Torso") {
-          file << "t|";
+          file << "t";
           file << *static_cast<Torso*>(robotparts[i]) << '\n';
         }
     }
     //RobotModel vector
     for(int i = 0; i < robotmodels.size(); i++) {
-      file << "r|";
+      file << "r";
       file << robotmodels[i] << '\n';
     }
     //Customer vector
     for(int i = 0; i < customers.size(); i++) {
-      file << "c|";
+      file << "c";
       file << customers[i] << '\n';
     }
     //SalesAssociate vector
     for(int i = 0; i < salesassociates.size(); i++) {
-      file << "s|";
+      file << "s";
       file << salesassociates[i] << '\n';
     }
     //Order vector
     for(int i = 0; i < orders.size(); i++) {
-      file << "o|";
+      file << "o";
       file << orders[i] << '\n';
     }
   }

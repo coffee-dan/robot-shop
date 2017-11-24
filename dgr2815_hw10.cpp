@@ -102,13 +102,13 @@ void display_message(string title, string message) {
 // /////////////////////////////////////
 class RobotPart {
   public:
-    RobotPart(string t, string n, int m, double c, double w, string d, string i)
+    RobotPart(string t, string n, string m, double c, double w, string d, string i)
      : type(t), name(n), model_number(m), cost(c), weight(w), description(d), image_filename(i) { }
     RobotPart()
      : type(), name(), model_number(), cost(), description(), image_filename() { }
     string getType() { return type; }
     string getName() { return name; }
-    string getModelNumber() { return std::to_string(model_number); }
+    string getModelNumber() { return model_number; }
     double getCost() { return cost; }
     double getWeight() { return weight; }
 
@@ -118,19 +118,19 @@ class RobotPart {
   protected:
     string type;
     string name;
-    int model_number;
+    string model_number;
     double cost;
     double weight;
     string description;
     string image_filename;
 };
 string RobotPart::to_string() {
-  string output = name+", Model #"+std::to_string(model_number)+"\n"+image_filename+", Cost : $"+dtos(cost, 2);
+  string output = name+", Model #"+model_number+"\n"+image_filename+", Cost : $"+dtos(cost, 2);
   output += "\nDescription : "+description+"\nWeight : "+dtos(weight, 2)+" [lbs]\n";
   return output;
 }
 string RobotPart::export_data() const{
-  return name+'|'+std::to_string(model_number)+'|'+dtos(cost,2)+'|'+dtos(weight,2)+'|'+description+'|'+image_filename;
+  return type+'|'+name+'|'+model_number+'|'+std::to_string(cost)+'|'+std::to_string(weight)+'|'+description+'|'+image_filename;
 }
 // /////////////////////////////////////
 //              A R M
@@ -153,7 +153,7 @@ string Arm::part_to_string() {
   return type+" : "+output+"Max Power : "+dtos(max_power, 2)+" [W]\n\n";
 }
 ofstream& operator<<(ofstream& ofs, const Arm arm) {
-  ofs << arm.export_data()+'|'+dtos(arm.max_power,2);
+  ofs << arm.export_data()+'|'+to_string(arm.max_power);
   return ofs;
 }
 istringstream& operator>>(istringstream& is, Arm& arm) {
@@ -183,7 +183,7 @@ istringstream& operator>>(istringstream& is, Arm& arm) {
   }
   arm.type = _type;
   arm.name = _name;
-  arm.model_number = stoi(_model_number);
+  arm.model_number = _model_number;
   arm.cost = stod(_cost);
   arm.weight = stod(_weight);
   arm.description = _description;
@@ -213,7 +213,7 @@ string Battery::part_to_string() {
   return type+" : "+output +"Power Available : "+dtos(power_available, 2)+" [W], Max Energy : "+dtos(max_energy, 2)+" [kWh]\n\n";
 }
 ofstream& operator<<(ofstream& ofs, const Battery battery) {
-  ofs << battery.export_data()+'|'+dtos(battery.power_available,2)+'|'+dtos(battery.max_energy,2);
+  ofs << battery.export_data()+'|'+to_string(battery.power_available)+'|'+to_string(battery.max_energy);
   return ofs;
 }
 istringstream& operator>>(istringstream& is, Battery& battery) {
@@ -245,7 +245,7 @@ istringstream& operator>>(istringstream& is, Battery& battery) {
   }
   battery.type = _type;
   battery.name = _name;
-  battery.model_number = stoi(_model_number);
+  battery.model_number = _model_number;
   battery.cost = stod(_cost);
   battery.weight = stod(_weight);
   battery.description = _description;
@@ -274,7 +274,7 @@ string Head::part_to_string() {
   return type+" : "+output +"Power : "+dtos(power, 2)+" [W]\n\n";
 }
 ofstream& operator<<(ofstream& ofs, const Head head) {
-  ofs << head.export_data()+'|'+dtos(head.power,2);
+  ofs << head.export_data()+'|'+to_string(head.power);
   return ofs;
 }
 istringstream& operator>>(istringstream& is, Head& head) {
@@ -304,7 +304,7 @@ istringstream& operator>>(istringstream& is, Head& head) {
   }
   head.type = _type;
   head.name = _name;
-  head.model_number = stoi(_model_number);
+  head.model_number = _model_number;
   head.cost = stod(_cost);
   head.weight = stod(_weight);
   head.description = _description;
@@ -334,7 +334,7 @@ string Locomotor::part_to_string() {
   return type+" : "+output +"Max Power : "+dtos(max_power, 2)+" [W], Max Speed : "+dtos(max_speed, 2)+" [mph]\n\n";
 }
 ofstream& operator<<(ofstream& ofs, const Locomotor locomotor) {
-  ofs << locomotor.export_data()+'|'+dtos(locomotor.max_power,2)+'|'+dtos(locomotor.max_speed,2);
+  ofs << locomotor.export_data()+'|'to_string(locomotor.max_power)+'|'+to_string(locomotor.max_speed);
   return ofs;
 }
 istringstream& operator>>(istringstream& is, Locomotor& locomotor) {
@@ -366,7 +366,7 @@ istringstream& operator>>(istringstream& is, Locomotor& locomotor) {
   }
   locomotor.type = _type;
   locomotor.name = _name;
-  locomotor.model_number = stoi(_model_number);
+  locomotor.model_number = _model_number;
   locomotor.cost = stod(_cost);
   locomotor.weight = stod(_weight);
   locomotor.description = _description;
@@ -430,7 +430,7 @@ istringstream& operator>>(istringstream& is, Torso& torso) {
   }
   torso.type = _type;
   torso.name = _name;
-  torso.model_number = stoi(_model_number);
+  torso.model_number = _model_number;
   torso.cost = stod(_cost);
   torso.weight = stod(_weight);
   torso.description = _description;
@@ -443,17 +443,12 @@ istringstream& operator>>(istringstream& is, Torso& torso) {
 // /////////////////////////////////////
 class RobotModel {
   public:
-    RobotModel(string n, int m, RobotPart* t, RobotPart* h, RobotPart* l, vector<RobotPart*> a, vector<RobotPart*> b, int numOfB, int numOfA)
-     : name(n), model_number(m), torso(t), head(h), locomotor(l), arms(a), batteries(b), num_of_batteries(numOfB), num_of_arms(numOfA) { }
+    RobotModel(string n, int m, RobotPart* t, RobotPart* h, RobotPart* l, vector<RobotPart*> a, vector<RobotPart*> b)
+     : name(n), model_number(m), torso(t), head(h), locomotor(l), arms(a), batteries(b) { }
     RobotModel()
-     : name(), model_number(), torso(), head(), locomotor(), arms(), batteries(), num_of_batteries(), num_of_arms() { }
-    RobotPart* getTorso() { return torso; }
-    RobotPart* getHead() { return head; }
-    RobotPart* getLocomotor() { return locomotor; }
-    RobotPart* getArm(int index) { return arms[index]; }
-    RobotPart* getBattery(int index) { return batteries[index]; }
+     : name(), model_number(), torso(), head(), locomotor(), arms(), batteries() { }
     string getName() { return name; }
-    string getModelNumber() { return std::to_string(model_number); }
+    int getModelNumber() { return model_number; }
     double total_weight();
     double cost_of_parts();
     double max_speed();
@@ -464,14 +459,12 @@ class RobotModel {
     friend istringstream& operator>>(istringstream& is, RobotModel& model);
   private:
     string name;
-    int model_number;
+    string model_number;
     RobotPart* torso;
     RobotPart* head;
     RobotPart* locomotor;
     vector<RobotPart*> arms;
     vector<RobotPart*> batteries;
-    int num_of_arms;
-    int num_of_batteries;
 };
 
 double RobotModel::total_weight() {
@@ -523,7 +516,7 @@ double RobotModel::battery_life() {
   return model_energy/power_consumption;
 }
 string RobotModel::to_string() {
-  string output = "Robot Model : "+name+", Model #"+std::to_string(model_number);
+  string output = "Robot Model : "+name+", Model #"+model_number;
   output += " - $"+dtos(cost_of_parts(), 2)+"\nMax Speed : "+dtos(max_speed(), 2)+" [mph], Max Battery Life : ";
   output += dtos(battery_life(), 2)+"[h]\n\n";
 
@@ -539,25 +532,23 @@ string RobotModel::to_string() {
   return output;
 }
 string RobotModel::basic_to_string() {
-  string output = "Robot Model : "+name+", Model #"+std::to_string(model_number);
+  string output = "Robot Model : "+name+", Model #"+model_number;
   output += " - $"+dtos(cost_of_parts(), 2)+"\nMax Speed : "+dtos(max_speed(), 2)+" [mph], Max Battery Life : ";
   output += dtos(battery_life(), 2)+"[h]\n\n";
   return output;
 }
 ofstream& operator<<(ofstream& ofs, const RobotModel model) {
-  ofs << model.name+'|'+to_string(model.model_number)+"|";
+  ofs << model.name+'|'+model.model_number+"|";
 
-  ofs << *static_cast<Torso*>(model.torso) << '|';
-  ofs << *static_cast<Head*>(model.head) << '|';
-  ofs << *static_cast<Locomotor*>(model.locomotor) << '|';
+  ofs << model.torso->getModelNumber() << '|';
+  ofs << model.head->getModelNumber() << '|';
+  ofs << model.locomotor->getModelNumber() << '|';
 
-  ofs << model.num_of_arms << '|';
   for(int i = 0; i < model.num_of_arms; i++) {
-    ofs << *static_cast<Arm*>(model.arms[i]) << '|';
+    ofs << "|!" << model.arms[i]->getModelNumber() << '|';
   }
-  ofs << model.num_of_batteries << '|';
   for(int i = 0; i < model.num_of_batteries; i++) {
-    ofs << *static_cast<Battery*>(model.batteries[i]) << '|';
+    ofs << "|?" << model.batteries[i]->getModelNumber() << '|';
   }
 
   return ofs;
@@ -613,7 +604,7 @@ istringstream& operator>>(istringstream& is, RobotModel& model) {
     if(delcount > 9) break;
   }
   model.name = _name;
-  model.model_number = stoi(_model_number);
+  model.model_number = _model_number;
   model.torso = torso;
   model.head = head;
   model.locomotor = locomotor;
@@ -625,11 +616,11 @@ istringstream& operator>>(istringstream& is, RobotModel& model) {
 // /////////////////////////////////////
 class Customer {
   public:
-    Customer(string _name, int _customer_num, string _phone_num, string _email);
+    Customer(string _name, string _customer_num, string _phone_num, string _email);
     Customer()
      : name(), customer_number(), phone_number(), email_address() { }
     string getName() { return name; }
-    int getCustomerNumber() { return customer_number; }
+    string getCustomerNumber() { return customer_number; }
     string getPhoneNumber() { return phone_number; }
     string getEmailAddress() { return email_address; }
     string to_string();
@@ -637,11 +628,11 @@ class Customer {
     friend istringstream& operator>>(istringstream& is, Customer& customer);
   private:
     string name;
-    int customer_number;
+    string customer_number;
     string phone_number;
     string email_address;
 };
-Customer::Customer(string _name, int _customer_num, string _phone_num, string _email) {
+Customer::Customer(string _name, string _customer_num, string _phone_num, string _email) {
   name = _name;
   customer_number = _customer_num;
   phone_number = _phone_num;
@@ -651,12 +642,12 @@ Customer::Customer(string _name, int _customer_num, string _phone_num, string _e
   email_address.insert(location_of_at, "@");
 }
 string Customer::to_string() {
-  string output = "Customer #"+std::to_string(customer_number)+" - "+name+'\n';
+  string output = "Customer #"+customer_number+" - "+name+'\n';
   output += phone_number+", "+email_address+'\n';
   return output;
 }
 ofstream& operator<<(ofstream& ofs, const Customer customer) {
-  ofs << customer.name+'|'+to_string(customer.customer_number)+'|'+customer.phone_number+'|'+customer.email_address;
+  ofs << customer.name+'|'+customer.customer_number+'|'+customer.phone_number+'|'+customer.email_address;
   return ofs;
 }
 istringstream& operator>>(istringstream& is, Customer& customer) {
@@ -680,7 +671,7 @@ istringstream& operator>>(istringstream& is, Customer& customer) {
     if(delcount > 4) break;
   }
   customer.name = _name;
-  customer.customer_number = stoi(_customer_number);
+  customer.customer_number = _customer_number;
   customer.phone_number = _phone_number;
   customer.email_address = _email_address;
 }
@@ -689,25 +680,25 @@ istringstream& operator>>(istringstream& is, Customer& customer) {
 // /////////////////////////////////////
 class SalesAssociate {
   public:
-    SalesAssociate(string _name, int _employee_num)
+    SalesAssociate(string _name, string _employee_num)
      : name(_name), employee_number(_employee_num) { }
     SalesAssociate()
      : name(), employee_number() { }
     string getName() { return name; }
-    int getEmployeeNumber() { return employee_number; }
+    string getEmployeeNumber() { return employee_number; }
     string to_string();
     friend ofstream& operator<<(ofstream& ofs, const SalesAssociate salesAssociate);
     friend istringstream& operator>>(istringstream& is, SalesAssociate& associate);
   private:
     string name;
-    int employee_number;
+    string employee_number;
 };
 string SalesAssociate::to_string() {
-  string output = "Sales Associate #"+std::to_string(employee_number)+" - "+name+'\n';
+  string output = "Sales Associate #"+employee_number+" - "+name+'\n';
   return output;
 }
 ofstream& operator<<(ofstream& ofs, const SalesAssociate salesAssociate) {
-  ofs << salesAssociate.name+'|'+to_string(salesAssociate.employee_number);
+  ofs << salesAssociate.name+'|'+salesAssociate.employee_number;
   return ofs;
 }
 istringstream& operator>>(istringstream& is, SalesAssociate& associate) {
@@ -727,7 +718,7 @@ istringstream& operator>>(istringstream& is, SalesAssociate& associate) {
     if(delcount > 2) break;
   }
   associate.name = name;
-  associate.employee_number = stoi(employee_number);
+  associate.employee_number = employee_number;
 }
 // /////////////////////////////////////
 //             O R D E R
@@ -759,7 +750,7 @@ string Order::to_string() {
 }
 ofstream& operator<<(ofstream& ofs, const Order order) {
   ofs << to_string(order.order_number)+'|'+order.date+'|';
-  ofs << order.customer << '|';
+  ofs << order.customer.getCustomerNumber() << '|';
   ofs << order.salesAssociate << '|';
   ofs << order.robotModel << to_string(order.status);
   return ofs;
@@ -860,12 +851,11 @@ class Shop {
 
 void Shop::create_new_robot_part(int choice) {
   display_message("Enter information as prompted.", "Gathering default robot part information...");
-  string name, description, type, image_filename;
-  int model_number;
+  string name, description, type, image_filename, model_number;
   double cost, weight;
 
   name = get_string("Robot Part Creation", "Part Name? ");
-  model_number = get_int(name, "Model Number? ");
+  model_number = get_string(name, "Model Number? ");
   cost = get_double(name, "Cost[$]? ");
   weight = get_double(name, "Weight[lbs]? ");
   description = get_string(name, "Description? ");
@@ -950,8 +940,8 @@ void Shop::create_new_robot_model() {
     return;
   }
 
-  string name, type;
-  int model_number, partIndex;
+  string name, type, model_number;
+  int partIndex;
   int maxArms, numOfArms;
   int maxBatteries, numOfBatteries;
   RobotPart* torso;
@@ -963,7 +953,7 @@ void Shop::create_new_robot_model() {
   RobotModel model;
 
   name = get_string(name, "Model Name? ");
-  model_number = get_int(name, "Model Number? ");
+  model_number = get_string(name, "Model Number? ");
 
   type = "Torso";
   partIndex = get_robot_part(type);
@@ -1010,7 +1000,7 @@ void Shop::create_new_robot_model() {
       return;
   }
 
-  model = RobotModel{name, model_number, torso, head, locomotor, arms, batteries, numOfBatteries, numOfArms};
+  model = RobotModel{name, model_number, torso, head, locomotor, arms, batteries};
   robotmodels.push_back(model);
 
 }
@@ -1028,13 +1018,12 @@ string Shop::model_list_to_string() {
 
 void Shop::create_new_customer() {
   display_message("Enter information as prompted", "Gathering customer information...");
-  string name, phone_number, email_address;
-  int customer_number;
+  string name, phone_number, email_address, customer_number;
 
   name = get_string(name, "Name[First and Last]? ");
   phone_number = get_string(name, "Phone Number? ");
   email_address = get_string(name, "Email Address? ");
-  customer_number = get_int(name, "Customer ID#? ");
+  customer_number = get_string(name, "Customer ID#? ");
 
   Customer customer = Customer{name, customer_number, phone_number, email_address};
   customers.push_back(customer);
@@ -1055,10 +1044,10 @@ string Shop::customer_list_to_string() {
 void Shop::create_new_sales_associate() {
   display_message("Enter information as prompted", "Gathering employee information...");
   string name;
-  int employee_number;
+  string employee_number;
 
   name = get_string("Sales Associate Account Creation", "Name[First and Last]? ");
-  employee_number = get_int(name, "Employee ID#" );
+  employee_number = get_string(name, "Employee ID#" );
 
   SalesAssociate salesAssociate = SalesAssociate{name, employee_number};
   salesassociates.push_back(salesAssociate);
@@ -1267,7 +1256,7 @@ void Shop::easter_egg() {
   customer = Customer{"John Smith", 2448, "817-555-5555", "email@aol.com"};
   customers.push_back(customer);
 
-  associate = SalesAssociate{"David Williams", 4562};
+  associate = SalesAssociate{"David Williams", "4562"};
   salesassociates.push_back(associate);
 
   order = Order{999, "January 2, 1997", customer, associate, model, 1};

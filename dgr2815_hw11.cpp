@@ -1361,22 +1361,22 @@ void Shop::open(string filename) {
       char c;
       for(char c; ss.get(c);) {
         if(c == '|') delcount++;
-        else if(delcount == 1 && isdigit(c)) {
+        else if(delcount == 0 && isdigit(c)) {
           order_number += c;
         }
-        else if(delcount == 2 && (isalnum(c) || ispunct(c) || c == ' ')) {
+        else if(delcount == 1 && (isalnum(c) || ispunct(c) || c == ' ')) {
           date += c;
         }
-        else if(delcount == 3 && isdigit(c)) {
+        else if(delcount == 2 && isdigit(c)) {
           customer_number += c;
         }
-        else if(delcount == 4 && isdigit(c)) {
+        else if(delcount == 3 && isdigit(c)) {
           employee_number += c;
         }
-        else if(delcount == 5 && isdigit(c)) {
+        else if(delcount == 4 && isdigit(c)) {
           model_number += c;
         }
-        else if(delcount == 6 && isdigit(c)) {
+        else if(delcount == 5 && isdigit(c)) {
           status += c;
         }
       }
@@ -1532,7 +1532,7 @@ void eggCB(Fl_Widget* w, void* p) {
 }
 
 // M e n u
-Fl_Menu_Item menuitems[] = {
+Fl_Menu_Item full_menu[] = {
   { "&File", 0, 0, 0, FL_SUBMENU },
     { "&Open", FL_ALT + 'p', (Fl_Callback *)openCB },
     { "&Save", FL_ALT + 's', (Fl_Callback *)saveCB },
@@ -1565,6 +1565,119 @@ Fl_Menu_Item menuitems[] = {
     { 0 },
   { 0 }
 };
+Fl_Menu_Item manager_menu[] = {
+  { "&File", 0, 0, 0, FL_SUBMENU },
+    { "&Open", FL_ALT + 'p', (Fl_Callback *)openCB },
+    { "&Exit", FL_ALT + 'x', (Fl_Callback *)exitCB },
+    { 0 },
+  { "&Create", 0, 0, 0, FL_SUBMENU },
+    { "&Part", 0, 0, 0, FL_SUBMENU },
+      { "&Arm", FL_ALT + 'a' , (Fl_Callback *)new_armCB },
+      { "&Battery", FL_ALT + 'b' , (Fl_Callback *)new_batteryCB },
+      { "&Head", FL_ALT + 'h' , (Fl_Callback *)new_headCB },
+      { "&Locomotor", FL_ALT + 'l' , (Fl_Callback *)new_locomotorCB },
+      { "&Torso", FL_ALT + 't' , (Fl_Callback *)new_torsoCB },
+      { 0 },
+    { "&Robot Model", FL_ALT + 'r', (Fl_Callback *)new_modelCB },
+    { 0 },
+  { "&Report", 0, 0, 0, FL_SUBMENU },
+    { "&Part", 0, (Fl_Callback *)list_partsCB },
+    { "&Robot Model", 0, (Fl_Callback *)list_modelsCB },
+    { 0 },
+  { "&Utility", 0, 0, 0, FL_SUBMENU },
+    { "&Help", FL_ALT + 'h', (Fl_Callback *)helpCB },
+    { 0 },
+  { 0 }
+};
+Fl_Menu_Item boss_menu[]  = {
+  { "&File", 0, 0, 0, FL_SUBMENU },
+    { "&Open", FL_ALT + 'p', (Fl_Callback *)openCB },
+    { "&Save", FL_ALT + 's', (Fl_Callback *)saveCB },
+    { "&Save As", 0, (Fl_Callback *)save_asCB },
+    { "&Exit", FL_ALT + 'x', (Fl_Callback *)exitCB },
+    { 0 },
+  { "&Create", 0, 0, 0, FL_SUBMENU },
+    { "&Customer", FL_ALT + 'c', (Fl_Callback *)new_customerCB },
+    { "&Sales Associate", FL_ALT + 's', (Fl_Callback *)new_associateCB },
+    { 0 },
+  { "&Report", 0, 0, 0, FL_SUBMENU },
+    { "&Order", 0, (Fl_Callback *)list_ordersCB },
+    { "&Customer", 0, (Fl_Callback *)list_customersCB },
+    { "&Sales Associate", 0, (Fl_Callback *)list_associatesCB },
+    { 0 },
+  { "&Utility", 0, 0, 0, FL_SUBMENU },
+    { "&Help", FL_ALT + 'h', (Fl_Callback *)helpCB },
+    { 0 },
+  { 0 }
+};
+Fl_Menu_Item employee_menu[] = {
+  { "&File", 0, 0, 0, FL_SUBMENU },
+    { "&Open", FL_ALT + 'p', (Fl_Callback *)openCB },
+    { "&Exit", FL_ALT + 'x', (Fl_Callback *)exitCB },
+    { 0 },
+  { "&Create", 0, 0, 0, FL_SUBMENU },
+    { "&Order", FL_ALT + 'o', (Fl_Callback *)new_orderCB },
+    { 0 },
+  { "&Report", 0, 0, 0, FL_SUBMENU },
+    { "&Order", 0, (Fl_Callback *)list_ordersCB },
+    { "&Customer", 0, (Fl_Callback *)list_customersCB },
+    { "&Sales Associate", 0, (Fl_Callback *)list_associatesCB },
+    { "&Robot Model", 0, (Fl_Callback *)list_modelsCB },
+    { 0 },
+  { "&Utility", 0, 0, 0, FL_SUBMENU },
+    { "&Help", FL_ALT + 'h', (Fl_Callback *)helpCB },
+    { 0 },
+  { 0 }
+};
+Fl_Menu_Item customer_menu[] = {
+  { "&File", 0, 0, 0, FL_SUBMENU },
+    { "&Open", FL_ALT + 'p', (Fl_Callback *)openCB },
+    { "&Exit", FL_ALT + 'x', (Fl_Callback *)exitCB },
+    { 0 },
+  { "&Report", 0, 0, 0, FL_SUBMENU },
+    { "&Robot Model", 0, (Fl_Callback *)list_modelsCB },
+    { 0 },
+  { "&Utility", 0, 0, 0, FL_SUBMENU },
+    { "&Help", FL_ALT + 'h', (Fl_Callback *)helpCB },
+    { 0 },
+  { 0 }
+};
+void login() {
+  string user_id, user_pass;
+  string login_menu = "--User IDs--\npm - Product Manager\npb - Point-haired Boss\nsa - Sales Associate\nbc - Beloved Customer\n\nEnter your User ID.";
+  while(true) {
+    user_id = get_string(login_menu);
+    if((user_id == "pm")||(user_id == "pb")||(user_id == "sa")||(user_id == "bc")||(user_id == "db"))
+      break;
+    display_message("Error", "Incorrect User ID, please try again!");
+  }
+
+  bool successful_login = false;
+  while(!successful_login) {
+    user_pass = get_string("Enter your password.");
+    if((user_id == "pm") && (user_pass == "Capitalism78")) {
+      menubar->menu(manager_menu);
+      successful_login = true;
+    }
+    else if((user_id == "pb") && (user_pass == "BestHairInTheOffice11")) {
+      menubar->menu(boss_menu);
+      successful_login = true;
+    }
+    else if((user_id == "sa") && (user_pass == "DailyGrind3000")) {
+      menubar->menu(employee_menu);
+      successful_login = true;
+    }
+    else if((user_id == "bc") && (user_pass == "Password1234")) {
+      menubar->menu(customer_menu);
+      successful_login = true;
+    }
+    else if((user_id == "db") && (user_pass == "SegmentationFault4")) {
+      menubar->menu(full_menu);
+      successful_login = true;
+    }
+
+  }
+}
 
 int main() {
   fl_message_hotspot(0);
@@ -1574,7 +1687,7 @@ int main() {
   win->begin();
 
     menubar = new Fl_Menu_Bar(0, 0, X, 30);
-    menubar->menu(menuitems);
+    menubar->menu(full_menu);
 
   win->end();
   win->show();

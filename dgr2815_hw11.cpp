@@ -1687,9 +1687,9 @@ int main() {
   win->begin();
 
     menubar = new Fl_Menu_Bar(0, 0, X, 30);
-    menubar->menu(full_menu);
 
   win->end();
   win->show();
+  login();
   return(Fl::run());
 }

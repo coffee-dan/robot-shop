@@ -7,6 +7,8 @@
 #include <FL/Fl.H>
 #include <FL/Fl_Window.H>
 #include <FL/Fl_Menu_Bar.H>
+#include <FL/Fl_Text_Display.H>
+#include <FL/Fl_Text_Buffer.H>
 #include <FL/Fl_Shared_Image.H>
 #include <FL/Fl_JPEG_Image.H>
 #include <FL/fl_ask.H>
@@ -1487,8 +1489,10 @@ string View::get_help() {
 }
 
 // globel
-Fl_Window *win;
+
 Fl_Menu_Bar *menubar;
+Fl_Text_Buffer *buff;
+Fl_Text_Display * disp;
 Shop shop;
 View view{shop};
 
@@ -1743,16 +1747,20 @@ int main() {
   Fl_Window beacon (1,1);
   beacon.show();
 
-  const int X = 640;
-	const int Y = 480;
-	win = new Fl_Window{X, Y, "Robo Boi"};
-  win->begin();
+  const int width = 640;
+	const int height = 480;
+  Fl_Window *win = new Fl_Window{width, height, "Robo Boi"};
 
-    menubar = new Fl_Menu_Bar(0, 0, X, 30);
+    menubar = new Fl_Menu_Bar(0, 0, width, 30);
     login();
     beacon.hide();
 
-  win->end();
+    buff = new Fl_Text_Buffer();
+    disp = new Fl_Text_Display(15, 45, width - 30, height - 60, "Testinging");
+    disp->buffer(buff);
+    win->resizable(*disp);
+
   win->show();
+  buff->text("This is a test\nWwew");
   return(Fl::run());
 }

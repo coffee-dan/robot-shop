@@ -1,3 +1,20 @@
+/*!
+ * \author Daniel Gerard Ramirez
+ * \version 2.3
+ * \date 2017-12-2
+ * \warning This is a student project, do not expect a lot.
+ *
+ * \mainpage Robbie Robot Shop
+ * \section intro_sec Introduction
+ * This code is meant to aid a robot vendor in the process of conducting business.
+ * \section compile_sec Compilation
+ * Here I will describe how to compile this code with GNU make.
+ * \subsection Make
+ * Navigate to the directory that the file 'dgr2815_hw12.cpp' is located.
+ * Input the command $ make
+ * To run the executable file that was created, input $ ./hw12
+ */
+
 #include <iostream>
 #include <vector>
 #include <string>
@@ -15,11 +32,17 @@
 
 using namespace std;
 
+/*! \brief Double to String.
+  * \details Converts a double to a string with a precision that is given by the
+  * second parameter. */
 string dtos(double num, int precision) {
   stringstream ss;
   ss << fixed << setprecision(precision) << num;
   return ss.str();
 }
+/*! \brief Retrieves input from user via fl_input.
+  * \details Takes in title and prompt for the fl_input dialog box that appears
+  * requesting a double input from the user. */
 double get_double(string title, string prompt) {
   string error = "Please enter a value greater than zero";
   double result;
@@ -34,6 +57,11 @@ double get_double(string title, string prompt) {
   }
   return result;
 }
+/*! \brief Version of get_double(string title, string prompt) with minimum input
+  * value taken as a parameter.
+  * \details Provides ability to retrieve input from user via fl_input with a
+  * minimum value being specified such that the user cannot input a lower
+  * than min_double. */
 double get_double(string title, string prompt, double min_double) {
   string error = "Please enter a value greater than "+std::to_string(min_double);
   double result;
@@ -48,6 +76,9 @@ double get_double(string title, string prompt, double min_double) {
   }
   return result;
 }
+/*! \brief Retrieves input from user via fl_input
+  * \details Takes in title and prompt for the fl_input dialog box that appears
+  * requesting an integer input from the user. */
 int get_int(string title, string prompt) {
   string error = "Please enter an integer greater than zero";
   int result;
@@ -62,6 +93,11 @@ int get_int(string title, string prompt) {
   }
   return result;
 }
+/*! \brief Version of get_int(string title, string prompt) with maximum integer
+  * value taken as a parameter.
+  * \details Provides ability to retrieve input from user via fl_input with a
+  * maximum value being specified such that the user cannot input a value higher
+  * than max_int. */
 int get_int(string title, string prompt, int max_int) {
   string error = "Please enter an integer between 0 and "+max_int;
   int result;
@@ -76,6 +112,10 @@ int get_int(string title, string prompt, int max_int) {
   }
   return result;
 }
+/*! \brief Version of get_int(string title, string prompt) with both maxmimum and
+  * minimum integer values taken as parameters.
+  * \details Takes in input via fl_input such that the user is unable to input a
+  * value lower than min_int or higher than max_int. */
 int get_int(string title, string prompt, int min_int, int max_int) {
   string error = "Please enter an integer between "+std::to_string(min_int)+" and "+std::to_string(max_int);
   int result;
@@ -132,13 +172,13 @@ class RobotPart {
     virtual string part_to_string()=0;
     virtual string part_export_data()=0;
   protected:
-    string type;
-    string name;
-    string partNumber;
-    double cost;
-    double weight;
-    string description;
-    string imageFilename;
+    string type; //!< Contains the RobotPart's type, as a default RobotPart cannot exist.
+    string name; //!< RobotPart's name.
+    string partNumber; //!< RobotPart's part number.
+    double cost; //!< Cost of RobotPart in USD as defined by the product manager.
+    double weight; //!< Weight of RobotPart in lbs as defined by the product manager.
+    string description; //!< Brief description of the RobotPart.
+    string imageFilename; //!< Filename for image of the RobotPart.
 };
 string RobotPart::to_string() {
   string output = name+", Model #"+partNumber+" - Cost : $"+dtos(cost, 2);
@@ -162,7 +202,7 @@ class Arm : public RobotPart {
 
     friend istringstream& operator>>(istringstream& is, Arm& arm);
   private:
-    double power;
+    double power; //!< Power consumed by Arm during user in Watts.
 };
 string Arm::part_to_string() {
   string output = RobotPart::to_string();
@@ -225,7 +265,7 @@ class Battery : public RobotPart {
 
     friend istringstream& operator>>(istringstream& is, Battery& battery);
   private:
-    double storedEnergy;
+    double storedEnergy; //!< Energy store in Battery in kWh.
 };
 string Battery::part_to_string() {
   string output = RobotPart::to_string();
@@ -289,7 +329,7 @@ class Head : public RobotPart {
     friend ofstream& operator<<(ofstream& ofs, const Head head);
     friend istringstream& operator>>(istringstream& is, Head& head);
   private:
-    double power;
+    double power; //!< Power consumed by Head during use in Watts.
 };
 string Head::part_to_string() {
   string output = RobotPart::to_string();
@@ -354,8 +394,8 @@ class Locomotor : public RobotPart {
     friend ofstream& operator<<(ofstream& ofs, const Locomotor locomotor);
     friend istringstream& operator>>(istringstream& is, Locomotor& locomotor);
   private:
-    double power;
-    double maxSpeed;
+    double power; //!< Power consumed by Locomotor in Watts.
+    double maxSpeed; //!< Rated max speed of Locomotor in mph.
 };
 string Locomotor::part_to_string() {
   string output = RobotPart::to_string();
@@ -425,8 +465,8 @@ class Torso : public RobotPart {
     friend ofstream& operator<<(ofstream& ofs, const Torso torso);
     friend istringstream& operator>>(istringstream& is, Torso& torso);
   private:
-    int batteryCompartments;
-    int maxArms;
+    int batteryCompartments; //!< Number of compartments that are available on the Torso.
+    int maxArms; //!< Number of Arms that can be attached to the Torso.
 };
 string Torso::part_to_string() {
   string output = RobotPart::to_string();
@@ -493,20 +533,20 @@ class RobotModel {
 
     friend ofstream& operator<<(ofstream& ofs, const RobotModel model);
   private:
-    string name;
-    string modelNumber;
-    RobotPart* torso;
-    RobotPart* head;
-    RobotPart* locomotor;
-    vector<RobotPart*> arms;
-    vector<RobotPart*> batteries;
-    double cost;
+    string name; //!< Name of the RobotModel.
+    string modelNumber; //!< Model number of the RobotModel, as a string as no calculations are done with this value.
+    RobotPart* torso; //!< RobotPart pointer for RobotModel's Torso component as RobotPart is an abstract class.
+    RobotPart* head; //!< RobotPart pointer for RobotModel's Head component as RobotPart is an abstract class.
+    RobotPart* locomotor; //!< RobotPart pointer for RobotModel's Locotmotor as RobotPart is an abstract class.
+    vector<RobotPart*> arms; //!< Vector of RobotPart pointers to store Arm components.
+    vector<RobotPart*> batteries; //!< Vector of RobotPart pointers to store Battery components.
+    double cost; //!< Cost of RobotModel as defined by the Pointer-Haired Boss.
 
-    double totalWeight;
-    double costOfParts;
-    bool powerLimited;
-    double batteryLife;
-    double maxSpeed;
+    double totalWeight; //!< Total weight of RobotModel, calculated when RobotModel is created.
+    double costOfParts; //!< Raw cost of all parts combined, to be viewed by Pointy-Haired Boss only.
+    bool powerLimited; //!< Boolean value that is true if the total power consumed by Head Torso and Locomotor exceeds that of the Battery's storedEnergy.
+    double batteryLife; //!< Estimated battery life of the RobotModel, calculated when RobotModel is created.
+    double maxSpeed; //!< Max speed of the RobotModel based on maxSpeed of Locomotor and the rated weight (5 times Locotmotor's weight) of that.
 };
 RobotModel::RobotModel(string n, string mn, RobotPart* t, RobotPart* h, RobotPart* l, vector<RobotPart*> a, vector<RobotPart*> b, double c) {
   name = n; modelNumber = mn;
@@ -609,10 +649,10 @@ class Customer {
     friend ofstream& operator<<(ofstream& ofs, const Customer customer);
     friend istringstream& operator>>(istringstream& is, Customer& customer);
   private:
-    string name;
-    string customerNumber;
-    string phoneNumber;
-    string emailAddress;
+    string name; //!< Name of Customer account.
+    string customerNumber; //!< Unique customer ID number.
+    string phoneNumber; //!< Phone number of Customer that is input upon account creation.
+    string emailAddress; //!< Email address of Customer that is input upon account creation.
 };
 Customer::Customer(string n, string cn, string pn, string e) {
   name = n;
@@ -670,8 +710,8 @@ class SalesAssociate {
     friend ofstream& operator<<(ofstream& ofs, const SalesAssociate salesAssociate);
     friend istringstream& operator>>(istringstream& is, SalesAssociate& associate);
   private:
-    string name;
-    string employeeNumber;
+    string name; //!< Name of SalesAssociate.
+    string employeeNumber; //!< Unique employee ID number.
 };
 string SalesAssociate::to_string() {
   string output = "Sales Associate #"+employeeNumber+" - "+name+'\n';
@@ -711,12 +751,12 @@ class Order {
     string to_string();
     friend ofstream& operator<<(ofstream& ofs, const Order order);
   private:
-    string orderNumber;
-    string date;
-    Customer customer;
-    SalesAssociate salesAssociate;
-    vector<RobotModel> models;
-    string status;
+    string orderNumber; //!< Unique order ID number.
+    string date; //!< Date the Order was made.
+    Customer customer; //!< Customer who made the order.
+    SalesAssociate salesAssociate; //!< SalesAssociate that assisted the Customer.
+    vector<RobotModel> models; //!< Vector of RobotModel's that were ordered by the Customer.
+    string status;  //!< Current status of the Order, starts at 0.
 };
 string Order::to_string() {
   string output = "Order #"+orderNumber+" - "+date+"\n\n";
@@ -753,27 +793,54 @@ ofstream& operator<<(ofstream& ofs, const Order order) {
   return ofs;
 }
 //-----------------------------------------------------------------------S H O P
+/** \class Shop
+  *
+  * \brief This is the central location where all records are kept and all objects are created.
+  *
+  * This class is meant to represent a Shop. Data can be added and retrieved to/from
+  * the Shop via the create_new_object functions and get_object_list functions
+  * respectively. */
 class Shop {
   public:
+    /** \brief Creates a new RobotPart.
+      * \param choice of which RobotPart type to create.
+      *
+      * This method retrieves relevant information from the user about whichever part
+      * they are creating via the get_int, get_double and get_string functions.
+      * The user chooses which RobotPart to create via the GUI menubar. */
     void create_new_robot_part(int choice);
+    ///Returns a string representation of a RobotPart from member robotParts.
     string part_to_string(int index);
+    /** \brief Gets information about all RobotParts in Shop's records.
+      * \return String representation of member robotParts. */
     string get_part_list();
+    ///Returns string list of RobotParts of a given type based on input.
     string get_part_list(string type);
 
+    /** \brief Create a new RobotModel.
+      *
+      * This method retrieves relevant infromation from the user about the a RobotModel,
+      * then creates a new RobotModel and adds it to member robotModels. */
     void create_new_robot_model();
+    ///Returns a string representation of a RobotModel from member robotModels.
     string model_to_string(int index);
+    /** \brief Gets infromation about all RobotModels in Shop's records.
+      * \return String representation of member robotModels. */
     string get_model_list();
     string get_basic_model_list();
 
     void create_new_customer();
+    ///This returns a string representation of a Customer from member customers.
     string customer_to_string(int index);
     string get_customer_list();
 
     void create_new_sales_associate();
+    ///This returns a string representation of a SalesAssociate from member salesAssociates.
     string associate_to_string(int index);
     string get_associate_list();
 
     void create_new_order();
+    ///This returns a string representation of an Order from member orders.
     string order_to_string(int index);
     string get_order_list();
     string get_order_list_by_associate();
@@ -787,11 +854,11 @@ class Shop {
     int get_sales_associate(string prompt);
     int get_robot_model();
 
-    vector<RobotPart*> robotParts;
-    vector<RobotModel> robotModels;
-    vector<Customer> customers;
-    vector<SalesAssociate> salesAssociates;
-    vector<Order> orders;
+    vector<RobotPart*> robotParts; //!< Vector of RobotPart pointers. A list of all RobotParts created for this Shop.
+    vector<RobotModel> robotModels; //!< Vector of RobotModels. A list of all RobotModels created for this Shop.
+    vector<Customer> customers; //!< Vector of Customers. A list of all Customer accounts created for this Shop.
+    vector<SalesAssociate> salesAssociates; //!< Vector of SalesAssociates. A list of all SalesAssociates that have worked for the Shop.
+    vector<Order> orders; //!< Vector of Orders. A list of all Orders that have been created for this Shop.
 };
 
 void Shop::create_new_robot_part(int choice) {

@@ -7,12 +7,12 @@ all: main
 debug: CXX += -g
 debug: main
 
-main: dgr2815_hw11.cpp
-	$(CXX) $(CXXFLAGS) $(fltk-config --use-images --cxxflags) -o hw11 dgr2815_hw11.cpp $(LDFLAGS)
+main: dgr2815_hw12.cpp
+	$(CXX) $(CXXFLAGS) $(fltk-config --use-images --cxxflags) -o hw12 dgr2815_hw12.cpp $(LDFLAGS)
 
 test: test.cpp
 	$(CXX) $(CXXFLAGS) -o test test.cpp `fltk-config --ldflags`
 	./test
 clean: FORCE
-	-rm -f shop.txt *.o hw11 test
+	-rm -f shop.txt *.o hw12 test
 FORCE:

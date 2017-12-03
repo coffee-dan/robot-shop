@@ -703,10 +703,10 @@ istringstream& operator>>(istringstream& is, SalesAssociate& associate) {
 //---------------------------------------------------------------------O R D E R
 class Order {
   public:
-    Order(string on, string d, Customer c, SalesAssociate sa, RobotModel rm, string s)
-     : orderNumber{on}, date{d}, customer{c}, salesAssociate{sa}, robotModel{rm}, status{s} { }
+    Order(string on, string d, Customer c, SalesAssociate sa, vector<RobotModel> ms, string s)
+     : orderNumber{on}, date{d}, customer{c}, salesAssociate{sa}, models{ms}, status{s} { }
     Order()
-     : orderNumber(), date(), customer(), salesAssociate(), robotModel(), status() { }
+     : orderNumber(), date(), customer(), salesAssociate(), models(), status() { }
     string get_sa_number() const { return salesAssociate.get_employee_number(); }
     string to_string();
     friend ofstream& operator<<(ofstream& ofs, const Order order);
@@ -715,14 +715,17 @@ class Order {
     string date;
     Customer customer;
     SalesAssociate salesAssociate;
-    RobotModel robotModel;
+    vector<RobotModel> models;
     string status;
 };
 string Order::to_string() {
   string output = "Order #"+orderNumber+" - "+date+"\n\n";
-  output += customer.to_string()+'\n';
-  output += salesAssociate.to_string()+'\n';
-  output += robotModel.basic_to_string();
+  output += customer.to_string() + '\n';
+  output += salesAssociate.to_string() + '\n';
+  for(int i = 0; i < models.size(); i++) {
+    output += std::to_string(i)+" of "+std::to_string(models.size())+" "+models[i].basic_to_string() + '\n';
+  }
+
   if(status == "0")
     output += "Order status: Pending";
   else if(status == "1")
@@ -740,11 +743,13 @@ string Order::to_string() {
   return output;
 }
 ofstream& operator<<(ofstream& ofs, const Order order) {
-  ofs << 'o'+order.orderNumber+'|'+order.date+'|';
-  ofs << order.customer.get_customer_number() << '|';
-  ofs << order.salesAssociate.get_employee_number() << '|';
-  ofs << order.robotModel.get_model_number() << '|';
-  ofs << order.status;
+  ofs << 'o' + order.orderNumber + '|' + order.date;
+  ofs << '|' + order.customer.get_customer_number();
+  ofs << '|' + order.salesAssociate.get_employee_number();
+  ofs << '|' + order.status;
+  for(int i = 0; i < order.models.size(); i++) {
+    ofs << "|!" + order.models[i].get_model_number();
+  }
   return ofs;
 }
 //-----------------------------------------------------------------------S H O P
@@ -1039,7 +1044,7 @@ void Shop::create_new_order() {
   int index;
   Customer customer;
   SalesAssociate salesAssociate;
-  RobotModel robotModel;
+  vector<RobotModel> models;
 
   date = get_string("Order Creation", "Today's Date? ");
   orderNumber = get_string("Order Creation", "Order ID#? ");
@@ -1051,10 +1056,17 @@ void Shop::create_new_order() {
   index = get_sales_associate("Which sales associate helped you?");
   salesAssociate = salesAssociates[index];
 
-  index = get_robot_model();
-  robotModel = robotModels[index];
+  string choice;
+  while(true) {
+    index = get_robot_model();
+    models.push_back(robotModels[index]);
 
-  Order order = Order{orderNumber, date, customer, salesAssociate, robotModel, status};
+    choice = get_string("Order Creation","Would you like to add another robot model?[Y/N]");
+    if((choice == "N") || (choice == "n")) break;
+  }
+
+
+  Order order = Order{orderNumber, date, customer, salesAssociate, models, status};
   orders.push_back(order);
 }
 string Shop::order_to_string(int index) {
@@ -1193,7 +1205,6 @@ void Shop::open(string filename) {
       int delcount = 0;
       char c;
       for(char c; ss.get(c);) {
-        cout << c;
         if(c == '|') delcount++;
         else if(delcount == 0 && (isalnum(c) || ispunct(c) || c == ' ')) {
           name += c;
@@ -1228,12 +1239,10 @@ void Shop::open(string filename) {
       for(char c; ss.get(c);) {
         if(c == '!') {
           getline(ss, atemp, '|');
-          cout << atemp << '\n';
           arms_mn.push_back(atemp);
         }
         else if(c == '?') {
           getline(ss, btemp, '|');
-          cout << btemp << '\n';
           batteries_mn.push_back(btemp);
         }
       }
@@ -1267,9 +1276,10 @@ void Shop::open(string filename) {
       string orderNumber, date, status;
       Customer customer;
       SalesAssociate salesAssociate;
-      RobotModel robotModel;
+      vector<RobotModel> models;
       //ID numbers for customer, salesassociate and robotmodel
-      string customerNumber, employeeNumber, modelNumber;
+      string customerNumber, employeeNumber, temp;
+      vector<string> modelNumbers;
       int delcount = 0;
       char c;
       for(char c; ss.get(c);) {
@@ -1287,12 +1297,16 @@ void Shop::open(string filename) {
           employeeNumber += c;
         }
         else if(delcount == 4 && isdigit(c)) {
-          modelNumber += c;
-        }
-        else if(delcount == 5 && isdigit(c)) {
           status += c;
         }
-        else if(delcount > 6) break;
+        else if(delcount > 4) break;
+      }
+      ss.putback(c);
+      for(char c; ss.get(c);) {
+        if(c == '!') {
+          getline(ss, temp, '|');
+          modelNumbers.push_back(temp);
+        }
       }
       //Create boolean values to ensure Order data is not corrupted or malformed
       bool customer_check = false; bool employee_check = false; bool model_check = false;
@@ -1308,15 +1322,17 @@ void Shop::open(string filename) {
           employee_check = true;
         }
       }
-      for(int i = 0; i < robotModels.size(); i++) {
-        if(robotModels[i].get_model_number() == modelNumber) {
-          robotModel = robotModels[i];
-          model_check = true;
+      for(int i = 0; i < modelNumbers.size(); i++) {
+        for(int j = 0; j < robotModels.size(); i++) {
+          if(robotModels[j].get_model_number() == modelNumbers[i]) {
+            models.push_back(robotModels[j]);
+            model_check = true;
+          }
         }
       }
       //If data is correctly formed Order will be added.
       if(customer_check && employee_check && model_check) {
-        Order order = Order{orderNumber, date, customer, salesAssociate, robotModel, status};
+        Order order = Order{orderNumber, date, customer, salesAssociate, models, status};
         orders.push_back(order);
       }
     }
@@ -1327,46 +1343,41 @@ void Shop::open(string filename) {
 void Shop::easter_egg() {
   display_message("Easter Egg", "Filling databases for testing...");
   string imageFilename = "image.png";
-  RobotPart* arm;
-  RobotPart* battery;
-  RobotPart* head;
-  RobotPart* locomotor;
-  RobotPart* torso;
 
   vector<RobotPart*> arms;
   vector<RobotPart*> batteries;
+  vector<RobotModel> models;
 
-  RobotModel model;
-  Customer customer;
-  SalesAssociate associate;
-  Order order;
-
-  arm = new Arm{"Arm", "ACME Arm", "5431", 49.95, 15, "Standard Issue", imageFilename, 8999};
+  RobotPart* arm = new Arm{"Arm", "ACME Arm", "5431", 49.95, 15, "Standard Issue", imageFilename, 8999};
   robotParts.push_back(arm);
   arms.push_back(arm);
   arms.push_back(arm);
-  battery = new Battery{"Battery", "ACME Battery", "9627", 14.95, 0.5, "Standard Issue", imageFilename, 56000};
+
+  RobotPart* battery = new Battery{"Battery", "ACME Battery", "9627", 14.95, 0.5, "Standard Issue", imageFilename, 56000};
   robotParts.push_back(battery);
   batteries.push_back(battery);
   batteries.push_back(battery);
 
-  head = new Head{"Head", "ACME Head", "1625", 149.95, 25, "Standard Issue", imageFilename, 8999};
+  RobotPart* head = new Head{"Head", "ACME Head", "1625", 149.95, 25, "Standard Issue", imageFilename, 8999};
   robotParts.push_back(head);
-  locomotor = new Locomotor{"Locomotor", "ACME Locomotor", "1830", 249.95, 75.5, "Standard Issue", imageFilename, 8999, 500.5};
+
+  RobotPart* locomotor = new Locomotor{"Locomotor", "ACME Locomotor", "1830", 249.95, 75.5, "Standard Issue", imageFilename, 8999, 500.5};
   robotParts.push_back(locomotor);
-  torso = new Torso{"Torso", "ACME Torso", "1151", 99.95, 120, "Standard Issue", imageFilename, 2, 2};
+
+  RobotPart* torso = new Torso{"Torso", "ACME Torso", "1151", 99.95, 120, "Standard Issue", imageFilename, 2, 2};
   robotParts.push_back(torso);
 
-  model = RobotModel{"ACME Robo", "5843", torso, head, locomotor, arms, batteries, 1899.95};
+  RobotModel model = RobotModel{"ACME Robo", "5843", torso, head, locomotor, arms, batteries, 1899.95};
   robotModels.push_back(model);
+  models.push_back(model);
 
-  customer = Customer{"John Smith", "2448", "817-555-5555", "email@aol.com"};
+  Customer customer = Customer{"John Smith", "2448", "817-555-5555", "email@aol.com"};
   customers.push_back(customer);
 
-  associate = SalesAssociate{"David Williams", "4562"};
+  SalesAssociate associate = SalesAssociate{"David Williams", "4562"};
   salesAssociates.push_back(associate);
 
-  order = Order{"999", "January 2, 1997", customer, associate, model, "1"};
+  Order order = Order{"999", "January 2, 1997", customer, associate, models, "1"};
   orders.push_back(order);
 
 }
@@ -1491,8 +1502,8 @@ string View::get_help() {
 // globel
 
 Fl_Menu_Bar *menubar;
-Fl_Text_Buffer *buff;
-Fl_Text_Display * disp;
+//Fl_Text_Buffer *buff;
+//Fl_Text_Display * disp;
 Shop shop;
 View view{shop};
 
@@ -1755,12 +1766,12 @@ int main() {
     login();
     beacon.hide();
 
-    buff = new Fl_Text_Buffer();
-    disp = new Fl_Text_Display(15, 45, width - 30, height - 60, "Testinging");
-    disp->buffer(buff);
-    win->resizable(*disp);
+    //buff = new Fl_Text_Buffer();
+    //disp = new Fl_Text_Display(15, 45, width - 30, height - 60, "Testinging");
+    //disp->buffer(buff);
+    //win->resizable(*disp);
 
   win->show();
-  buff->text("This is a test\nWwew");
+  //buff->text("This is a test\nWwew");
   return(Fl::run());
 }

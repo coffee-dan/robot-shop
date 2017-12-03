@@ -1,19 +1,17 @@
-/*!
- * \author Daniel Gerard Ramirez
- * \version 2.3
- * \date 2017-12-2
- * \warning This is a student project, do not expect a lot.
- *
- * \mainpage Robbie Robot Shop
- * \section intro_sec Introduction
- * This code is meant to aid a robot vendor in the process of conducting business.
- * \section compile_sec Compilation
- * Here I will describe how to compile this code with GNU make.
- * \subsection Make
- * Navigate to the directory that the file 'dgr2815_hw12.cpp' is located.
- * Input the command $ make
- * To run the executable file that was created, input $ ./hw12
- */
+/*! \author Daniel Gerard Ramirez
+  * \version 2.3
+  * \date 2017-12-2
+  * \warning This is a student project, do not expect a lot.
+  *
+  * \mainpage Robbie Robot Shop
+  * \section intro_sec Introduction
+  * This code is meant to aid a robot vendor in the process of conducting business.
+  * \section compile_sec Compilation
+  * Here I will describe how to compile this code with GNU make.
+  * \subsection Make
+  * Navigate to the directory that the file 'dgr2815_hw12.cpp' is located.
+  * Input the command $ make
+  * To run the executable file that was created, input $ ./hw12 */
 
 #include <iostream>
 #include <vector>
@@ -747,8 +745,12 @@ class Order {
      : orderNumber{on}, date{d}, customer{c}, salesAssociate{sa}, models{ms}, status{s} { }
     Order()
      : orderNumber(), date(), customer(), salesAssociate(), models(), status() { }
+    string get_order_number() const { return orderNumber; }
     string get_sa_number() const { return salesAssociate.get_employee_number(); }
+    string get_status() const { return status; }
     string to_string();
+
+    void update_status();
     friend ofstream& operator<<(ofstream& ofs, const Order order);
   private:
     string orderNumber; //!< Unique order ID number.
@@ -763,24 +765,91 @@ string Order::to_string() {
   output += customer.to_string() + '\n';
   output += salesAssociate.to_string() + '\n';
   for(int i = 0; i < models.size(); i++) {
-    output += std::to_string(i)+" of "+std::to_string(models.size())+" "+models[i].basic_to_string() + '\n';
+    output += std::to_string(i+1)+" of "+std::to_string(models.size())+" : "+models[i].basic_to_string() + '\n';
   }
 
-  if(status == "0")
+  if(status == "00")
     output += "Order status: Pending";
-  else if(status == "1")
-    output += "Order status: Packaging";
-  else if(status == "2")
-    output += "Order status: Shipping";
-  else if(status == "3")
+
+  else if(status == "11")
+    output += "Order status: Packaging and Billing";
+  else if(status == "21")
+    output += "Order status: Shipping and Billing";
+  else if(status == "31")
     output += "Order status: Billing";
-  else if(status == "4")
+  else if(status == "12")
+    output += "Order status: Packaging and Accepting payment";
+  else if(status == "13")
+    output += "Order status: Packaging";
+
+  else if(status == "22")
+    output += "Order status: Shipping and Accepting Payment";
+  else if(status == "32")
     output += "Order status: Accepting payment";
-  else if(status == "5")
+  else if(status == "23")
+    output += "Order status: Shipping";
+
+  else if(status == "33")
     output += "Order status: Completed";
-  else if(status == "6")
+  else if(status == "44")
     output += "Order status: Canceled";
   return output;
+}
+void Order::update_status() {
+  int update;
+  string title = "Order update";
+  string prompt = "Select the change you would like to make.\n";
+  if(status == "00") {
+    prompt += "Begin Order :: 1\n\nCancel Order :: 0\nCancel Update :: -1";
+    update = get_int(title, prompt, -1, 1);
+    if(update == 1) status = "11";
+  }
+  else if(status == "11") {
+    prompt += "Packaged :: 1\nBilled :: 2\n\nCancel Order :: 0\nCancel Update :: -1";
+    update = get_int(title, prompt, -1, 2);
+    if(update == 1) status = "21";
+    if(update == 2) status = "12";
+  }
+  else if(status == "12") {
+    prompt += "Packaged :: 1\nPaid :: 2\n\nCancel Order :: 0\nCancel Update :: -1";
+    update = get_int(title, prompt, -1, 2);
+    if(update == 1) status = "22";
+    if(update == 2) status = "13";
+  }
+  else if(status == "21") {
+    prompt += "Shipped :: 1\nBilled :: 2\n\nCancel Order :: 0\nCancel Update :: -1";
+    update = get_int(title, prompt, -1, 2);
+    if(update == 1) status = "31";
+    if(update == 2) status = "22";
+  }
+  else if(status == "22") {
+    prompt += "Shipped :: 1\nPaid :: 2\n\nCancel Order :: 0\nCancel Update :: -1";
+    update = get_int(title, prompt, -1, 2);
+    if(update == 1) status = "32";
+    if(update == 2) status = "23";
+  }
+
+  else if(status == "31") {
+    prompt += "Billed :: 1\n\nCancel Order :: 0\nCancel Update :: -1";
+    update = get_int(title, prompt, -1, 1);
+    if(update == 1) status = "32";
+  }
+  else if(status == "32") {
+    prompt += "Paid :: 1\n\nCancel Order :: 0\nCancel Update :: -1";
+    update = get_int(title, prompt, -1, 1);
+    if(update == 1) status = "33";
+  }
+  else if(status == "13") {
+    prompt += "Packaged :: 1\n\nCancel Order :: 0\nCancel Update :: -1";
+    update = get_int(title, prompt, -1, 1);
+    if(update == 1) status = "23";
+  }
+  else if(status == "23") {
+    prompt += "Shipped :: 1\n\nCancel Order :: 0\nCancel Update :: -1";
+    update = get_int(title, prompt, -1, 1);
+    if(update == 1) status = "33";
+  }
+  if(update == 0) status = "44";
 }
 ofstream& operator<<(ofstream& ofs, const Order order) {
   ofs << 'o' + order.orderNumber + '|' + order.date;
@@ -840,6 +909,7 @@ class Shop {
     string get_associate_list();
 
     void create_new_order();
+    void manage_order();
     ///This returns a string representation of an Order from member orders.
     string order_to_string(int index);
     string get_order_list();
@@ -847,12 +917,14 @@ class Shop {
 
     void save(string filename);
     void open(string filename);
+    string get_help();
     void easter_egg();
   private:
     int get_robot_part(string type);
     int get_customer();
     int get_sales_associate(string prompt);
     int get_robot_model();
+    int get_order();
 
     vector<RobotPart*> robotParts; //!< Vector of RobotPart pointers. A list of all RobotParts created for this Shop.
     vector<RobotModel> robotModels; //!< Vector of RobotModels. A list of all RobotModels created for this Shop.
@@ -1136,6 +1208,22 @@ void Shop::create_new_order() {
   Order order = Order{orderNumber, date, customer, salesAssociate, models, status};
   orders.push_back(order);
 }
+void Shop::manage_order() {
+  if(orders.size() == 0) {
+    display_message("Error", "No orders on record");
+    return;
+  }
+
+  int index = get_order();
+  string status = orders[index].get_status();
+  if((status == "44") || (status == "33")) {
+    display_message("Error", "No updates can be made on this Order");
+    return;
+  }
+
+  orders[index].update_status();
+  display_message("Updated order", order_to_string(index));
+}
 string Shop::order_to_string(int index) {
   return orders[index].to_string();
 }
@@ -1151,14 +1239,17 @@ string Shop::get_order_list_by_associate() {
   if(orders.size() == 0) return "No orders on record";
   if(salesAssociates.size() == 0) return "Search could not be conducted as no sales associate accounts exist.";
 
-  int index = get_sales_associate("Enter which associate you would like to audit.");
-  string associateIndex = to_string(index);
+  int index = get_sales_associate("Enter the name of the associate you would like to audit.");
+  SalesAssociate associate = salesAssociates[index];
+  string employeeNumber = associate.get_employee_number();
 
-  string output = "";
+  string output = "Associate #"+employeeNumber+'\n';
   for(int i = 0; i < orders.size(); i++) {
-    if(orders[i].get_sa_number() == associateIndex)
-      output += order_to_string(i);
+    if(orders[i].get_sa_number() == employeeNumber) {
+      output += order_to_string(index);
+    }
   }
+
   return output;
 }
 
@@ -1206,7 +1297,7 @@ void Shop::open(string filename) {
     display_message("Error", "File is not working...");
     return;
   }
-  ///Resolving data that is without dependencies
+  //Resolving data that is without dependencies
   while(getline(file, line)) {
     istringstream ss {line};
     type = ss.get();
@@ -1407,6 +1498,9 @@ void Shop::open(string filename) {
 
   }
 }
+string Shop::get_help() {
+
+}
 void Shop::easter_egg() {
   display_message("Easter Egg", "Filling databases for testing...");
   string imageFilename = "image.png";
@@ -1444,7 +1538,7 @@ void Shop::easter_egg() {
   SalesAssociate associate = SalesAssociate{"David Williams", "4562"};
   salesAssociates.push_back(associate);
 
-  Order order = Order{"999", "January 2, 1997", customer, associate, models, "1"};
+  Order order = Order{"999", "January 2, 1997", customer, associate, models, "00"};
   orders.push_back(order);
 
 }
@@ -1487,11 +1581,11 @@ int Shop::get_customer() {
   bool customerExists;
   int customerIndex;
 
-  prompt = "Please select a customer account. ";
+  prompt = "Enter the name of the customer you wish to select.";
 
   display_message("Customer list", "Retrieving customer account information...");
   while(true) {
-    display_message("Customer list", get_customer_list());
+    display_message("Identify the relevant customer name", get_customer_list());
 
     customerName = get_string("Customer Account Selection", prompt);
     for(int i = 0; i < customers.size(); i++) {
@@ -1513,9 +1607,9 @@ int Shop::get_sales_associate(string prompt) {
 
   display_message("Sales Associate list", "Retrieving sales associate information...");
   while(true) {
-    display_message("Sales Associate list", get_associate_list());
+    display_message("Identify the relevant associate name", get_associate_list());
 
-    associateName = get_string("Associate Selection", prompt);
+    associateName = get_string("Sales Associate Selection", prompt);
     for(int i = 0; i < salesAssociates.size(); i++) {
       if(salesAssociates[i].get_name() == associateName) {
         associateExists = true;
@@ -1533,11 +1627,11 @@ int Shop::get_robot_model() {
   bool modelExists;
   int modelIndex;
 
-  prompt = "Which robot model would you like to purchase? ";
+  prompt = "Enter the name of the robot model you wish to purchase.";
 
   display_message("Robot Model list", "Retrieving robot model information...");
   while(true) {
-    display_message("Robot Model list", get_model_list());
+    display_message("Indentify the relevant model name", get_model_list());
 
     modelName = get_string("Robot Model Selection", prompt);
     for(int i = 0; i < robotModels.size(); i++) {
@@ -1553,26 +1647,34 @@ int Shop::get_robot_model() {
 
   return modelIndex;
 }
-//-----------------------------------------------------------------------V I E W
-class View {
-  public:
-    View(Shop& shop)
-     : shop(shop) { }
-    string get_help();
-  private:
-    Shop& shop;
-};
-string View::get_help() {
-  return "Here.";
+int Shop::get_order() {
+  string orderNumber, prompt;
+  bool orderExists;
+  int orderIndex;
+
+  prompt = "Enter the order number of the order you wish to manage.";
+
+  display_message("Order list", "Retrieving order information...");
+  while(true) {
+    display_message("Identify the relevant order number", get_order_list());
+
+    orderNumber = get_string("Order Selection", prompt);
+    for(int i = 0; i < orders.size(); i++) {
+      if(orders[i].get_order_number() == orderNumber) {
+        orderExists = true;
+        orderIndex = i;
+      }
+    }
+
+    if(orderExists) break;
+    display_message("Error", "Error - Please re-enter order number.");
+  }
+
+  return orderIndex;
 }
-
 // globel
-
 Fl_Menu_Bar *menubar;
-//Fl_Text_Buffer *buff;
-//Fl_Text_Display * disp;
 Shop shop;
-View view{shop};
 
 //-------------------------------------------------------------C A L L B A C K S
 
@@ -1631,7 +1733,7 @@ void list_ordersCB(Fl_Widget* w, void* p) {
   display_message("Order List", shop.get_order_list());
 }
 void list_orders_by_associateCB(Fl_Widget* w, void* p) {
-  display_message("Order List", shop.get_order_list());
+  display_message("Order List", shop.get_order_list_by_associate());
 }
 void list_customersCB(Fl_Widget* w, void* p) {
   display_message("Customer Account List", shop.get_customer_list());
@@ -1650,10 +1752,10 @@ void list_models_basicCB(Fl_Widget* w, void* p) {
 }
 //UTILITY
 void helpCB(Fl_Widget* w, void* p) {
-  display_message("Help", "H", view.get_help());
+  display_message("Help", "H", shop.get_help());
 }
 void manage_orderCB(Fl_Widget* w, void* p) {
-
+  shop.manage_order();
 }
 void eggCB(Fl_Widget* w, void* p) {
 	shop.easter_egg();
@@ -1695,6 +1797,7 @@ Fl_Menu_Item full_menu[] = {
     { 0 },
   { "&Utility", 0, 0, 0, FL_SUBMENU },
     { "&Help", FL_ALT + 'h', (Fl_Callback *)helpCB },
+    { "&Manage Orders", FL_ALT + 'm', (Fl_Callback *)manage_orderCB },
     { "&Egg", FL_ALT + 'e', (Fl_Callback *)eggCB },
     { 0 },
   { 0 }
@@ -1744,6 +1847,7 @@ Fl_Menu_Item boss_menu[]  = {
     { 0 },
   { "&Utility", 0, 0, 0, FL_SUBMENU },
     { "&Help", FL_ALT + 'h', (Fl_Callback *)helpCB },
+    { "&Manage Orders", FL_ALT + 'm', (Fl_Callback *)manage_orderCB },
     { 0 },
   { 0 }
 };
@@ -1833,12 +1937,6 @@ int main() {
     login();
     beacon.hide();
 
-    //buff = new Fl_Text_Buffer();
-    //disp = new Fl_Text_Display(15, 45, width - 30, height - 60, "Testinging");
-    //disp->buffer(buff);
-    //win->resizable(*disp);
-
   win->show();
-  //buff->text("This is a test\nWwew");
   return(Fl::run());
 }

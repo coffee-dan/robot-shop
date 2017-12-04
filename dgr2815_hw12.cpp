@@ -1029,7 +1029,8 @@ void Shop::create_new_robot_part(int choice) {
     part = new Arm{type, name, partNumber, cost, weight, description, imageFilename, power};
     robotParts.push_back(part);
 
-  } else if(choice == 2) {
+  }
+  else if(choice == 2) {
     display_message("Battery", "Gathering unique battery information...");
     double storedEnergy;
 
@@ -1038,7 +1039,8 @@ void Shop::create_new_robot_part(int choice) {
     part = new Battery{type, name, partNumber, cost, weight, description, imageFilename, storedEnergy};
     robotParts.push_back(part);
 
-  } else if(choice == 3) {
+  }
+  else if(choice == 3) {
     display_message("Head", "Gathering unique robot head information...");
     double power;
 
@@ -1047,7 +1049,8 @@ void Shop::create_new_robot_part(int choice) {
     part = new Head{type, name, partNumber, cost, weight, description, imageFilename, power};
     robotParts.push_back(part);
 
-  } else if(choice == 4) {
+  }
+  else if(choice == 4) {
     display_message("Locomotor", "Gathering unique locomotor information...");
     double power, maxSpeed;
 
@@ -1057,7 +1060,8 @@ void Shop::create_new_robot_part(int choice) {
     part = new Locomotor{type, name, partNumber, cost, weight, description, imageFilename, power, maxSpeed};
     robotParts.push_back(part);
 
-  } else if(choice == 5) {
+  }
+  else if(choice == 5) {
     display_message("Torso", "Gathering unique robot torso information...");
     int batteryCompartments, maxArms;
 
@@ -1068,6 +1072,8 @@ void Shop::create_new_robot_part(int choice) {
     robotParts.push_back(part);
 
   }
+
+  display_message("New "+type+" part", part_to_string(robotParts.size() - 1));
 }
 string Shop::part_to_string(int index) {
   return robotParts[index]->part_to_string();
@@ -1170,6 +1176,8 @@ void Shop::create_new_robot_model() {
 
   model = RobotModel{name, modelNumber, torso, head, locomotor, arms, batteries, model_cost};
   robotModels.push_back(model);
+
+  display_message("New robot model", model_to_string(robotModels.size() - 1));
 }
 string Shop::model_to_string(int index) {
   return robotModels[index].to_string();
@@ -1203,6 +1211,7 @@ void Shop::create_new_customer() {
   Customer customer = Customer{name, customerNumber, phoneNumber, emailAddress};
   customers.push_back(customer);
 
+  display_message("New customer account", customer_to_string(customers.size() - 1));
 }
 string Shop::customer_to_string(int index) {
   return customers[index].to_string();
@@ -1226,6 +1235,8 @@ void Shop::create_new_sales_associate() {
 
   SalesAssociate salesAssociate = SalesAssociate{name, employeeNumber};
   salesAssociates.push_back(salesAssociate);
+
+  display_message("New sales associate account", associate_to_string(salesAssociates.size() - 1));
 }
 string Shop::associate_to_string(int index) {
   return salesAssociates[index].to_string();
@@ -1277,9 +1288,10 @@ void Shop::create_new_order() {
     if((choice == "N") || (choice == "n")) break;
   }
 
-
   Order order = Order{orderNumber, date, customer, salesAssociate, models, status};
   orders.push_back(order);
+
+  display_message("New order", order_to_string(orders.size() - 1));
 }
 void Shop::manage_order() {
   if(orders.size() == 0) {

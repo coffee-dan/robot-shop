@@ -834,11 +834,11 @@ class Order {
     string status;  //!< Current status of the Order, starts at 0.
 };
 string Order::to_string() {
-  string output = "Order #"+orderNumber+" - "+date+"\n\n";
+  string output = "Order #"+orderNumber+" - "+date+"\n";
   output += customer.to_string() + '\n';
   output += salesAssociate.to_string() + '\n';
   for(int i = 0; i < models.size(); i++) {
-    output += std::to_string(i+1)+" of "+std::to_string(models.size())+" : "+models[i].basic_to_string() + '\n';
+    output += std::to_string(i+1)+" of "+std::to_string(models.size())+" : "+models[i].basic_to_string();
   }
 
   if(status == "00")
@@ -866,7 +866,7 @@ string Order::to_string() {
     output += "Order status: Completed";
   else if(status == "44")
     output += "Order status: Canceled";
-  return output;
+  return output+"\n\n";
 }
 void Order::update_status() {
   int update;
@@ -1260,7 +1260,7 @@ void Shop::create_new_order() {
 
   date = get_string("Order Creation", "Today's Date? ");
   orderNumber = get_string("Order Creation", "Order ID#? ");
-  status = "0";
+  status = "00";
 
   index = get_customer();
   customer = customers[index];
@@ -1575,56 +1575,62 @@ void Shop::open(string filename) {
   }
 }
 string Shop::get_help() {
-  string file_help = R"(
-    File > Open - Load in saved data from user specified file.
-    File > Save - Save Shop data to default file "shop.txt". Will create file if
-    it does not exist.
-    File > Save As - Save Shop data to user specified file. Will create file if it
-    does not exist.
-    File > Exit - Exits program safely.)";
+  string file_help = "File > Open - Load in saved data from user specified file.\n";
+    file_help += "File > Save - Save Shop data to default file \"shop.txt\". Will create file if\n";
+    file_help += "it does not exist.\nFile > Save As - Save Shop data to user specified file. Will create file if it\n";
+    file_help += "does not exist.\nFile > Exit - Exits program safely.";
+  string create_help = "Data is gathered via a series of prompts.\n\n";
+    create_help += "Create > Order - Gathers data relevant to Order. Then adds order to Shop records.\n";
+    create_help += "Create > Customer - Gathers data relevant to Customer account. Then adds\n";
+    create_help += "account to Shop records.\n";
+    create_help += "Create > Sales Associate - Gathers data relevant to Sales Associate account.\n";
+    create_help += "Then adds account to Shop records.\n";
+    create_help += "Create > Part > Arm - Gathers data relevant to Arm along with generic RobotPart\n";
+    create_help += "data. Adds new Arm to Shop records.\n";
+    create_help += "Create > Part > Battery - Gathers data relevant to Battery along with generic\n";
+    create_help += "RobotPart data. Adds new Battery to Shop records.\n";
+    create_help += "Create > Part > Head - Gathers data relevant to Head along with generic RobotPart\n";
+    create_help += "data. Adds new Head to Shop records.\n";
+    create_help += "Create > Part > Locomotor - Gathers data relevant to Locomotor along with generic\n";
+    create_help += "RobotPart data. Adds new Locomotor to Shop records.\n";
+    create_help += "Create > Part > Torso - Gathers data relevant to Torso along with generic\n";
+    create_help += "RobotPart data. Adds new Torso to Shop records.\n";
+    create_help += "Create > Robot Model - Gathers data relevant to Robot Model then adds it to\n";
+    create_help += "Shop records.";
+  string report_help = "All Shop record reports are presented inside of a dialog box.\n\n";
+    report_help += "Report > Order > All Orders - Displays list of all orders in shop records.\n";
+    report_help += "Report > Order > By Associate - Prompts user for a sales associate's name\n";
+    report_help += "then lists all orders that were created by that associate.\n";
+    report_help += "Report > Customer - Displays list of all customer accounts in shop records.\n";
+    report_help += "Report > Associate - Displays list of all asociate accounts in shop records.\n";
+    report_help += "Report > Part - Displays list of all parts in shop records.\n";
+    report_help += "Report > Robot Model > Boss View - Displays list of all robot models in shop\n";
+    report_help += "records.\n";
+    report_help += "Report > Robot Model > Customer View - Displays a simplified list of all\n";
+    report_help += "robot models in shop records.";
+  string utility_help = "Utility > Help - Provides a dialog box with helpful information on all menu\n";
+    utility_help += "options related to a given menu bar tab that is specified by the user.\n";
+    utility_help += "Utility > Manage Order - Provides ability to change status of an order, only\n";
+    utility_help += "relvant changes can be made, typically 3 status-changing options or less are\n";
+    utility_help += "available at once.\n";
+    utility_help += "Utility > Egg - Adds generic data to Shop records for help with testing.";
 
-  string create_help = R"(
-    Data is gathered via a series of prompts.
-
-    Create > Order - Gathers data relevant to Order. Then adds order to Shop records.
-    Create > Customer - Gathers data relevant to Customer account. Then adds
-    account to Shop records.
-    Create > Sales Associate - Gathers data relevant to Sales Associate account.
-    Then adds account to Shop records.
-    Create > Part > Arm - Gathers data relevant to Arm along with generic RobotPart
-    data. Adds new Arm to Shop records.
-    Create > Part > Battery - Gathers data relevant to Battery along with generic
-    RobotPart data. Adds new Battery to Shop records.
-    Create > Part > Head - Gathers data relevant to Head along with generic RobotPart
-    data. Adds new Head to Shop records.
-    Create > Part > Locomotor - Gathers data relevant to Locomotor along with generic
-    RobotPart data. Adds new Locomotor to Shop records.
-    Create > Part > Torso - Gathers data relevant to Torso along with generic
-    RobotPart data. Adds new Torso to Shop records.
-    Create > Robot Model - Gathers data relevant to Robot Model then adds it to
-    Shop records.)";
-
-  string report_help = R"(
-    All Shop record reports are presented inside of a dialog box.
-
-    Report > Order > All Orders - Displays list of all orders in shop records.
-    Report > Order > By Associate - Prompts user for a sales associate's name
-    then lists all orders that were created by that associate.
-    Report > Customer - Displays list of all customer accounts in shop records.
-    Report > Associate - Displays list of all asociate accounts in shop records.
-    Report > Part - Displays list of all parts in shop records.
-    Report > Robot Model > Boss View - Displays list of all robot models in shop
-    records.
-    Report > Robot Model > Customer View - Displays a simplified list of all
-    robot models in shop records.)";
-
-  string utility_help = R"(
-    Utility > Help - Provides a dialog box with helpful information on all menu
-    options related to a given menu bar tab that is specified by the user.
-    Utility > Manage Order - Provides ability to change status of an order, only
-    relvant changes can be made, typically 3 status-changing options or less are
-    available at once.
-    Utility > Egg - Adds generic data to Shop records for help with testing.)";
+  string choice;
+  while(true) {
+    choice = get_string("Get Help", "Enter one of the menu bar titles to recieve help.\nAlternatively enter \"cancel\" to exit.");
+    if((choice == "File") || (choice == "file"))
+      return file_help;
+    else if((choice == "Create") || (choice == "create"))
+      return create_help;
+    else if((choice == "Report") || (choice == "report"))
+      return report_help;
+    else if((choice == "Utility") || (choice == "utility"))
+      return utility_help;
+    else if((choice == "Choice") || (choice == "choice"))
+      return "Canceled help request.";
+    else
+      display_message("Error", "Please try again.");
+  }
 }
 void Shop::easter_egg() {
   display_message("Easter Egg", "Filling databases for testing...");
@@ -1703,7 +1709,7 @@ int Shop::get_robot_part(string type) {
 }
 int Shop::get_customer() {
   string customerName, prompt;
-  bool customerExists;
+  bool customerExists = false;
   int customerIndex;
 
   prompt = "Enter the name of the customer you wish to select.";
@@ -1715,15 +1721,14 @@ int Shop::get_customer() {
     customerName = get_string("Customer Account Selection", prompt);
     for(int i = 0; i < customers.size(); i++) {
       if(customers[i].get_name() == customerName) {
-        customerExists == true;
+        customerExists = true;
         customerIndex = i;
       }
     }
 
-    if(customerExists) break;
+    if(customerExists) return customerIndex;
     display_message("Error", "Please re-enter customer name.");
   }
-  return customerIndex;
 }
 int Shop::get_sales_associate(string prompt) {
   string associateName;
@@ -1756,7 +1761,7 @@ int Shop::get_robot_model() {
 
   display_message("Robot Model list", "Retrieving robot model information...");
   while(true) {
-    display_message("Indentify the relevant model name", get_model_list());
+    display_message("Indentify the relevant model name", get_basic_model_list());
 
     modelName = get_string("Robot Model Selection", prompt);
     for(int i = 0; i < robotModels.size(); i++) {
@@ -1902,7 +1907,7 @@ Fl_Menu_Item full_menu[] = {
     { "&Part", 0, 0, 0, FL_SUBMENU },
       { "&Arm", FL_ALT + 'a' , (Fl_Callback *)new_armCB },
       { "&Battery", FL_ALT + 'b' , (Fl_Callback *)new_batteryCB },
-      { "&Head", FL_ALT + 'h' , (Fl_Callback *)new_headCB },
+      { "&Head", 0, (Fl_Callback *)new_headCB },
       { "&Locomotor", FL_ALT + 'l' , (Fl_Callback *)new_locomotorCB },
       { "&Torso", FL_ALT + 't' , (Fl_Callback *)new_torsoCB },
       { 0 },
@@ -1938,7 +1943,7 @@ Fl_Menu_Item manager_menu[] = {
     { "&Part", 0, 0, 0, FL_SUBMENU },
       { "&Arm", FL_ALT + 'a' , (Fl_Callback *)new_armCB },
       { "&Battery", FL_ALT + 'b' , (Fl_Callback *)new_batteryCB },
-      { "&Head", FL_ALT + 'h' , (Fl_Callback *)new_headCB },
+      { "&Head", 0, (Fl_Callback *)new_headCB },
       { "&Locomotor", FL_ALT + 'l' , (Fl_Callback *)new_locomotorCB },
       { "&Torso", FL_ALT + 't' , (Fl_Callback *)new_torsoCB },
       { 0 },

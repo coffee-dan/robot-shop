@@ -152,6 +152,12 @@ void display_message(string title, string message) {
 	fl_message("%s", message.c_str());
 }
 //-----------------------------------------------------------R O B O T   P A R T
+/** \class RobotPart
+  *
+  * \brief Pure abstract class that has several default data members.
+  *
+  * RobotPart has seven data members that hold infromation that each of the child
+  * classes share with it as they use the RobotModel constructor. */
 class RobotPart {
   public:
     RobotPart(string t, string n, string m, double c, double w, string d, string i)
@@ -187,6 +193,14 @@ string RobotPart::export_data() const{
   return type+'|'+name+'|'+partNumber+'|'+std::to_string(cost)+'|'+std::to_string(weight)+'|'+description+'|'+imageFilename;
 }
 //-------------------------------------------------------------------------A R M
+/** \class Arm
+  *
+  * \brief Arm is one of five RobotPart types.
+  *
+  * A RobotModel can have multiple Arm components according the maxArms data
+  * member in Torso, another component of RobotModel. Arm only contains one
+  * unique data member, power, which represents the amount of power consumed
+  * when the RobotModel it is attached to is powered on. */
 class Arm : public RobotPart {
   public:
     Arm(string t, string n, string m, double c, double w, string d, string i, double m_p)
@@ -250,6 +264,13 @@ istringstream& operator>>(istringstream& is, Arm& arm) {
   arm.imageFilename = imageFilename;
 }
 //-----------------------------------------------------------------B A T T E R Y
+/** \class Battery
+  *
+  * \brief Battery is one of five RobotPart types.
+  *
+  * Battery has one unique data member, storedEnergy, which represents the
+  * amount of energy (in kWh) is within the Battery. This value is used in several
+  * calculations within RobotModel. */
 class Battery : public RobotPart {
   public:
     Battery(string t, string n, string m, double c, double w, string d, string i, double se)
@@ -313,6 +334,13 @@ istringstream& operator>>(istringstream& is, Battery& battery) {
   battery.storedEnergy = stod(storedEnergy);
 }
 //-----------------------------------------------------------------------H E A D
+/** \class Head
+  *
+  * \brief Head is one of five RobotPart types.
+  *
+  * Head only has one unique data member, power, which it shares with Arm and
+  * Locomotor. Power defines the amount of power consumed when this RobotModel
+  * that this Head is attached to is powered on. */
 class Head : public RobotPart {
   public:
     Head(string t, string n, string m, double c, double w, string d, string i, double p)
@@ -377,6 +405,15 @@ istringstream& operator>>(istringstream& is, Head& head) {
   head.power = stod(power);
 }
 //-------------------------------------------------------------L O C O M O T O R
+/** \class Locomotor
+  *
+  * \brief Locomotor is one of five RobotPart types.
+  *
+  * Locomotor has the member maxSpeed which is the speed that it can potentially
+  * reach so long as it is not supporting more than five times it's own weight.
+  * This potential max speed translates to the RobotModel via a calculation that
+  * compares five times the Locomotor's weight and the weight of the RobotModel.
+  */
 class Locomotor : public RobotPart {
   public:
     Locomotor(string t, string n, string m, double c, double w, string d, string i, double m_p, double m_s)
@@ -447,6 +484,13 @@ istringstream& operator>>(istringstream& is, Locomotor& locomotor) {
   locomotor.maxSpeed = stod(maxSpeed);
 }
 //---------------------------------------------------------------------T O R S O
+/** \class Torso
+  *
+  * \brief Torso is one of five RobotPart types.
+  *
+  * Only one Torso can exist on a RobotModel. Torso has two members,
+  * batteryCompartments and maxArms that dictate how the maximum Battery and Arm
+  * components can be supported by a RobotModel. */
 class Torso : public RobotPart {
   public:
     Torso(string t, string n, string m, double c, double w, string d, string i, int b, int m_a)
@@ -518,6 +562,14 @@ istringstream& operator>>(istringstream& is, Torso& torso) {
   torso.maxArms = stoi(maxArms);
 }
 //---------------------------------------------------------R O B O T   M O D E L
+/** \class RobotModel
+  *
+  * \brief RobotModel aggregates all five of the RobotPart types.
+  *
+  * A RobotModel must have one of each RobotPart type in order to be created and
+  * added to the Shop's member vector robotModels. RobotModel can have more than
+  * one Battery and Arm is the Torso component can support this via members
+  * batteryCompartments and maxArms. */
 class RobotModel {
   public:
     RobotModel(string n, string mn, RobotPart* t, RobotPart* h, RobotPart* l, vector<RobotPart*> a, vector<RobotPart*> b, double c);
@@ -533,9 +585,9 @@ class RobotModel {
   private:
     string name; //!< Name of the RobotModel.
     string modelNumber; //!< Model number of the RobotModel, as a string as no calculations are done with this value.
-    RobotPart* torso; //!< RobotPart pointer for RobotModel's Torso component as RobotPart is an abstract class.
-    RobotPart* head; //!< RobotPart pointer for RobotModel's Head component as RobotPart is an abstract class.
-    RobotPart* locomotor; //!< RobotPart pointer for RobotModel's Locotmotor as RobotPart is an abstract class.
+    RobotPart* torso; //!< RobotPart pointer for RobotModel's Torso. Only one can be on a RobotModel.
+    RobotPart* head; //!< RobotPart pointer for RobotModel's Head. Only one can be on a RobotModel.
+    RobotPart* locomotor; //!< RobotPart pointer for RobotModel's Locomotor. Only one can be on a RobotModel.
     vector<RobotPart*> arms; //!< Vector of RobotPart pointers to store Arm components.
     vector<RobotPart*> batteries; //!< Vector of RobotPart pointers to store Battery components.
     double cost; //!< Cost of RobotModel as defined by the Pointer-Haired Boss.
@@ -636,6 +688,12 @@ ofstream& operator<<(ofstream& ofs, const RobotModel model) {
   return ofs;
 }
 //-----------------------------------------------B E L O V E D   C U S T O M E R
+/** \class Customer
+  *
+  * \brief Known as beloved customer, Customer holds information about Shop customers.
+  *
+  * Customer represents customers of the Shop. The Shop holds records of customers
+  * in a member vector. */
 class Customer {
   public:
     Customer(string n, string cn, string pn, string e);
@@ -696,6 +754,13 @@ istringstream& operator>>(istringstream& is, Customer& customer) {
   customer.emailAddress = emailAddress;
 }
 //-------------------------------------------------S A L E S   A S S O C I A T E
+/** \class SalesAssociate
+  *
+  * \brief SalesAssociate holds information about Shop employees.
+  *
+  * SalesAssociate represents employes of the Shop. The Shop holds records of
+  * sales associates in a member vector.
+  * */
 class SalesAssociate {
   public:
     SalesAssociate(string n, string en)
@@ -739,6 +804,14 @@ istringstream& operator>>(istringstream& is, SalesAssociate& associate) {
   associate.employeeNumber = employeeNumber;
 }
 //---------------------------------------------------------------------O R D E R
+/** \class Order
+  *
+  * \brief Order aggregates all other classes except Shop.
+  *
+  * This class is meant to represent an RobotModel Order. An Order is created by
+  * a SalesAssociate for a Customer and includes information about what the customer
+  * wishes to purchase from the Shop. Order also keeps track of the status of the
+  * Order via a Finite State Machine. */
 class Order {
   public:
     Order(string on, string d, Customer c, SalesAssociate sa, vector<RobotModel> ms, string s)
@@ -1440,7 +1513,7 @@ void Shop::open(string filename) {
       vector<string> modelNumbers;
       int delcount = 0;
       char c;
-      for(char c; ss.get(c);) {
+      for(; ss.get(c);) {
         if(c == '|') delcount++;
         else if(delcount == 0 && isdigit(c)) {
           orderNumber += c;
@@ -1458,9 +1531,12 @@ void Shop::open(string filename) {
           status += c;
         }
         else if(delcount > 4) break;
+        cout << c;
       }
+      cout << c << '\n';
       ss.putback(c);
-      for(char c; ss.get(c);) {
+
+      for(; ss.get(c);) {
         if(c == '!') {
           getline(ss, temp, '|');
           modelNumbers.push_back(temp);
@@ -1481,7 +1557,7 @@ void Shop::open(string filename) {
         }
       }
       for(int i = 0; i < modelNumbers.size(); i++) {
-        for(int j = 0; j < robotModels.size(); i++) {
+        for(int j = 0; j < robotModels.size(); j++) {
           if(robotModels[j].get_model_number() == modelNumbers[i]) {
             models.push_back(robotModels[j]);
             model_check = true;
@@ -1499,7 +1575,56 @@ void Shop::open(string filename) {
   }
 }
 string Shop::get_help() {
+  string file_help = R"(
+    File > Open - Load in saved data from user specified file.
+    File > Save - Save Shop data to default file "shop.txt". Will create file if
+    it does not exist.
+    File > Save As - Save Shop data to user specified file. Will create file if it
+    does not exist.
+    File > Exit - Exits program safely.)";
 
+  string create_help = R"(
+    Data is gathered via a series of prompts.
+
+    Create > Order - Gathers data relevant to Order. Then adds order to Shop records.
+    Create > Customer - Gathers data relevant to Customer account. Then adds
+    account to Shop records.
+    Create > Sales Associate - Gathers data relevant to Sales Associate account.
+    Then adds account to Shop records.
+    Create > Part > Arm - Gathers data relevant to Arm along with generic RobotPart
+    data. Adds new Arm to Shop records.
+    Create > Part > Battery - Gathers data relevant to Battery along with generic
+    RobotPart data. Adds new Battery to Shop records.
+    Create > Part > Head - Gathers data relevant to Head along with generic RobotPart
+    data. Adds new Head to Shop records.
+    Create > Part > Locomotor - Gathers data relevant to Locomotor along with generic
+    RobotPart data. Adds new Locomotor to Shop records.
+    Create > Part > Torso - Gathers data relevant to Torso along with generic
+    RobotPart data. Adds new Torso to Shop records.
+    Create > Robot Model - Gathers data relevant to Robot Model then adds it to
+    Shop records.)";
+
+  string report_help = R"(
+    All Shop record reports are presented inside of a dialog box.
+
+    Report > Order > All Orders - Displays list of all orders in shop records.
+    Report > Order > By Associate - Prompts user for a sales associate's name
+    then lists all orders that were created by that associate.
+    Report > Customer - Displays list of all customer accounts in shop records.
+    Report > Associate - Displays list of all asociate accounts in shop records.
+    Report > Part - Displays list of all parts in shop records.
+    Report > Robot Model > Boss View - Displays list of all robot models in shop
+    records.
+    Report > Robot Model > Customer View - Displays a simplified list of all
+    robot models in shop records.)";
+
+  string utility_help = R"(
+    Utility > Help - Provides a dialog box with helpful information on all menu
+    options related to a given menu bar tab that is specified by the user.
+    Utility > Manage Order - Provides ability to change status of an order, only
+    relvant changes can be made, typically 3 status-changing options or less are
+    available at once.
+    Utility > Egg - Adds generic data to Shop records for help with testing.)";
 }
 void Shop::easter_egg() {
   display_message("Easter Egg", "Filling databases for testing...");
@@ -1680,8 +1805,9 @@ Shop shop;
 
 //FILE
 void openCB(Fl_Widget* w, void* p) {
-  display_message("Load", "Importing data...");
-  shop.open("shop.txt");
+  string filename = get_string("Open", "Enter a filename.");
+  display_message("Open", "Importing data from "+filename);
+  shop.open(filename);
 }
 void saveCB(Fl_Widget* w, void* p) {
   display_message("Save", "Exporting data...");
@@ -1791,8 +1917,8 @@ Fl_Menu_Item full_menu[] = {
     { "&Sales Associate", 0, (Fl_Callback *)list_associatesCB },
     { "&Part", 0, (Fl_Callback *)list_partsCB },
     { "&Robot Model", 0, 0, 0, FL_SUBMENU },
-      { "&Boss List", 0, (Fl_Callback *)list_modelsCB },
-      { "&Customer List", 0, (Fl_Callback *)list_models_basicCB },
+      { "&Boss View", 0, (Fl_Callback *)list_modelsCB },
+      { "&Customer View", 0, (Fl_Callback *)list_models_basicCB },
       { 0 },
     { 0 },
   { "&Utility", 0, 0, 0, FL_SUBMENU },
